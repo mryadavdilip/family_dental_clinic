@@ -84,7 +84,7 @@ class AuthController {
           .createUserWithEmailAndPassword(email: email, password: password)
           .then((credential) async {
         _firestore.collection(pathName.users).doc(credential.user!.email).set({
-          fieldAndKeyName.id: await generateId(ss),
+          fieldAndKeyName.id: await Utils(context).generateId(ss),
           fieldAndKeyName.email: credential.user!.email,
           fieldAndKeyName.name: name,
           fieldAndKeyName.phone: phone,
@@ -230,26 +230,6 @@ class AuthController {
     bool signedInWithGoogle = await GoogleSignIn().isSignedIn();
     bool signedInWithEmailAndPassword = currentUser != null;
     return signedInWithGoogle || signedInWithEmailAndPassword;
-  }
-
-  Future<String> generateId(QuerySnapshot snapshot) async {
-    int max = 0;
-
-    await _firestore.collection(pathName.users).get().then((snapshot) {
-      snapshot.docs;
-
-      for (int i = 0; i < snapshot.docs.length - 1; i++) {
-        if (int.parse(snapshot.docs[i].get(fieldAndKeyName.id)) <
-            int.parse(snapshot.docs[i + 1].get(fieldAndKeyName.id))) {
-          max = int.parse(snapshot.docs[i + 1].get(fieldAndKeyName.id));
-        }
-      }
-    }).catchError((e) {});
-
-    if (kDebugMode) {
-      print('max id in firestore: $max');
-    }
-    return '${max + 1}';
   }
 
   void setProfilePicture() {

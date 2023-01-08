@@ -5,6 +5,7 @@ class PathName {
   final String users = 'users';
   final String services = 'Services';
   final String userProfilePictures = 'userProfilePictures';
+  final String appointments = 'appointments';
 }
 
 final PathName pathName = PathName();
@@ -25,6 +26,7 @@ class FieldAndKeyName {
   final String lastResetRequest = 'lastResetRequest';
   final String profilePicture = 'profilePicture';
   final String userRole = 'userRole';
+  final String time = 'time';
 }
 
 final FieldAndKeyName fieldAndKeyName = FieldAndKeyName();

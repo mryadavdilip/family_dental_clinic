@@ -2,6 +2,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:family_dental_clinic/Authentication/auth_controller.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomAppBar.dart';
+import 'package:family_dental_clinic/Screens/HomePage/BookAppointment.dart';
 import 'package:family_dental_clinic/Screens/HomePage/ProfilePage.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
 import 'package:family_dental_clinic/provider/AdminDataProvider.dart';
@@ -45,7 +46,12 @@ class _HomePageState extends State<HomePage> {
       {
         'title': widget.isAdmin ? 'Appointments' : 'Book Appointment',
         'icon': Icons.history_outlined,
-        'action': () {},
+        'action': () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (ctx) => const BookAppointmentPage()),
+          );
+        },
       },
       {
         'title': 'Reports',
@@ -79,34 +85,44 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       key: scaffoldKey,
       endDrawer: SafeArea(
-        child: Drawer(
+        child: StatefulBuilder(builder: (ctx, setStat) {
+          return Drawer(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.horizontal(
                 left: Radius.circular(20.r),
               ),
             ),
             child: Column(
-              children: drawerItems.map((e) {
-                return ListTile(
-                  leading: Icon(
-                    e['icon'],
-                    size: 30.sp,
-                    color: Colors.black,
-                  ),
-                  title: Text(
-                    e['title'],
-                    style: GoogleFonts.roboto(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    textScaleFactor: 1.sp,
-                  ),
-                  onTap: e['action'],
-                  minLeadingWidth: 50.w,
-                  dense: true,
-                );
-              }).toList(),
-            )),
+              children: [
+                Column(
+                  children: drawerItems.map((e) {
+                    return ListTile(
+                      onTap: () {
+                        e['action']();
+                        setStat(() {});
+                      },
+                      leading: Icon(
+                        e['icon'],
+                        size: 30.sp,
+                        color: Colors.black,
+                      ),
+                      title: Text(
+                        e['title'],
+                        style: GoogleFonts.roboto(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textScaleFactor: 1.sp,
+                      ),
+                      minLeadingWidth: 50.w,
+                    );
+                  }).toList(),
+                ),
+                SizedBox(height: 50.h),
+              ],
+            ),
+          );
+        }),
       ),
       body: SafeArea(
         child: SizedBox(

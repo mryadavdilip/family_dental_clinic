@@ -130,4 +130,77 @@ class Utils {
       }
     });
   }
+
+  getOrdinal({required int number}) {
+    if (number >= 11 && number <= 13) {
+      return 'th';
+    }
+
+    switch (number % 10) {
+      case 1:
+        return 'st';
+      case 2:
+        return 'nd';
+      case 3:
+        return 'rd';
+      default:
+        return 'th';
+    }
+  }
+
+  Future<String> generateId(QuerySnapshot snapshot) async {
+    int max = 0;
+
+    await _firestore.collection(pathName.users).get().then((snapshot) {
+      snapshot.docs;
+
+      for (int i = 0; i < snapshot.docs.length - 1; i++) {
+        if (int.parse(snapshot.docs[i].get(fieldAndKeyName.id)) <
+            int.parse(snapshot.docs[i + 1].get(fieldAndKeyName.id))) {
+          max = int.parse(snapshot.docs[i + 1].get(fieldAndKeyName.id));
+        }
+      }
+    }).catchError((e) {});
+
+    if (kDebugMode) {
+      print('max id in firestore: $max');
+    }
+    return '${max + 1}';
+  }
+
+  String? getMonthName(int month) {
+    Map<int, String> monthName = {
+      1: 'January',
+      2: 'February',
+      3: 'March',
+      4: 'April',
+      5: 'May',
+      6: 'June',
+      7: 'July',
+      8: 'August',
+      9: 'September',
+      10: 'October',
+      11: 'November',
+      12: 'December',
+    };
+    return monthName[month];
+  }
+
+  int? getDaysInMonth(int month, int year) {
+    Map<int, int> daysInMonth = {
+      1: 31,
+      2: year % 4 == 0 ? 29 : 28,
+      3: 31,
+      4: 30,
+      5: 31,
+      6: 30,
+      7: 31,
+      8: 31,
+      9: 30,
+      10: 31,
+      11: 30,
+      12: 31,
+    };
+    return daysInMonth[month];
+  }
 }
