@@ -1,0 +1,31 @@
+{
+    "project_info": {
+        "project_number": "707340869914",
+        "project_id": "family-dental-clinic-2c2cb",
+        "storage_bucket": "family-dental-clinic-2c2cb.appspot.com"
+    },
+    "client": [{
+        "client_info": {
+            "mobilesdk_app_id": "1:707340869914:android:ad748dcea2bf0959b5cca3",
+            "android_client_info": {
+                "package_name": "com.example.family_dental_clinic"
+            }
+        },
+        "oauth_client": [{
+            "client_id": "707340869914-lkvhlkm445ii30i57u6patdq5ot6pm4n.apps.googleusercontent.com",
+            "client_type": 3
+        }],
+        "api_key": [{
+            "current_key": "AIzaSyB6rMRNfdnc3Ml-oLekRYHvlYBhMHq-WJg"
+        }],
+        "services": {
+            "appinvite_service": {
+                "other_platform_oauth_client": [{
+                    "client_id": "707340869914-lkvhlkm445ii30i57u6patdq5ot6pm4n.apps.googleusercontent.com",
+                    "client_type": 3
+                }]
+            }
+        }
+    }],
+    "configuration_version": "1"
+}
