@@ -2,10 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:family_dental_clinic/Authentication/auth_controller.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomAppointmentsButton.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomChip.dart';
+import 'package:family_dental_clinic/CustomWidgets/CustomIconButton.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomLableText.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomTextField.dart';
 import 'package:family_dental_clinic/CustomWidgets/DatePickerChip.dart';
-import 'package:family_dental_clinic/SlotTimeResponse.dart';
+import 'package:family_dental_clinic/Screens/Appointments/PatientAppointments.dart';
+import 'package:family_dental_clinic/modules/SlotTimeResponse.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
 import 'package:family_dental_clinic/infra/Utils.dart';
 import 'package:flutter/foundation.dart';
@@ -67,6 +69,9 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
               Row(
                 children: [
                   SizedBox(width: 20.w),
+                  CustomIconButton(onTap: () {
+                    Navigator.pop(context);
+                  }),
                   const CustomLableText(text: 'Book Appointment'),
                 ],
               ),
@@ -236,139 +241,147 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
               Center(
                 child: CustomButton(
                   onTap: () async {
-                    String? email = AuthController(context).currentUser!.email;
-                    String appointmentId = await Utils(context).generateId(
-                        await _firestore
-                            .collection(pathName.appointments)
-                            .get());
-                    _firestore
-                        .collection(pathName.appointments)
-                        .doc(email)
-                        .set({
-                      fieldAndKeyName.id: appointmentId,
-                      fieldAndKeyName.time: dateTime.toIso8601String(),
-                    }).then((value) {
-                      showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (context) {
-                          return Scaffold(
-                            backgroundColor: Colors.transparent,
-                            body: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  height: 550.h,
-                                  width: 335.w,
-                                  padding:
-                                      EdgeInsets.symmetric(horizontal: 20.w),
-                                  margin:
-                                      EdgeInsets.symmetric(horizontal: 40.w),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(16.r),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      SizedBox(height: 30.h),
-                                      Icon(
-                                        Icons.check_circle_outline,
-                                        size: 100.sp,
-                                        color: Colors.blue,
-                                      ),
-                                      SizedBox(height: 12.h),
-                                      Text(
-                                        'Thank You !',
-                                        style: GoogleFonts.rubik(
-                                          fontSize: 38,
-                                          fontWeight: FontWeight.w500,
-                                          color: const Color(0xFF333333),
+                    Utils(context)
+                        .generateId(pathName.appointments)
+                        .then((appointmentId) {
+                      _firestore
+                          .collection(pathName.appointments)
+                          .doc(PathName(context)
+                              .getAppointmentPath(appointmentId))
+                          .set({
+                        fieldAndKeyName.id: appointmentId,
+                        fieldAndKeyName.email:
+                            AuthController(context).currentUser!.email,
+                        fieldAndKeyName.time: dateTime.toIso8601String(),
+                        fieldAndKeyName.status: AppointmentStatus.confirm.name,
+                      }).then((value) {
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) {
+                            return Scaffold(
+                              backgroundColor: Colors.transparent,
+                              body: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    height: 550.h,
+                                    width: 335.w,
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 20.w),
+                                    margin:
+                                        EdgeInsets.symmetric(horizontal: 40.w),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(16.r),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        SizedBox(height: 30.h),
+                                        Icon(
+                                          Icons.check_circle_outline,
+                                          size: 100.sp,
+                                          color: Colors.blue,
                                         ),
-                                        textScaleFactor: 1.sp,
-                                      ),
-                                      SizedBox(height: 30.h),
-                                      SizedBox(
-                                        height: 50.h,
-                                        child: Text(
-                                          'Appointment scheduled at:\n${dateTime.day} ${Utils(context).getMonthName(dateTime.month)} ${dateTime.year}, ${DateFormat('hh:mm a').format(dateTime)}',
+                                        SizedBox(height: 12.h),
+                                        Text(
+                                          'Thank You !',
                                           style: GoogleFonts.rubik(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w400,
-                                            color: const Color(0xFF677294),
+                                            fontSize: 38,
+                                            fontWeight: FontWeight.w500,
+                                            color: const Color(0xFF333333),
                                           ),
-                                          textAlign: TextAlign.center,
                                           textScaleFactor: 1.sp,
                                         ),
-                                      ),
-                                      const Spacer(),
-                                      GestureDetector(
-                                        onTap: () {
-                                          Navigator.pop(context);
-                                        },
-                                        behavior: HitTestBehavior.translucent,
-                                        child: Container(
-                                          height: 54.h,
-                                          width: 295.w,
-                                          alignment: Alignment.center,
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFF084B7F),
-                                            borderRadius:
-                                                BorderRadius.circular(6.r),
-                                          ),
+                                        SizedBox(height: 30.h),
+                                        SizedBox(
+                                          height: 50.h,
                                           child: Text(
-                                            'Done',
+                                            'Appointment scheduled at:\n${dateTime.day} ${Utils(context).getMonthName(dateTime.month)} ${dateTime.year}, ${DateFormat('hh:mm a').format(dateTime)}',
                                             style: GoogleFonts.rubik(
                                               fontSize: 18,
-                                              fontWeight: FontWeight.w500,
-                                              color: Colors.white,
+                                              fontWeight: FontWeight.w400,
+                                              color: const Color(0xFF677294),
                                             ),
+                                            textAlign: TextAlign.center,
                                             textScaleFactor: 1.sp,
                                           ),
                                         ),
-                                      ),
-                                      SizedBox(height: 10.h),
-                                      GestureDetector(
-                                        onTap: () {
-                                          //
-                                        },
-                                        behavior: HitTestBehavior.translucent,
-                                        child: SizedBox(
-                                          height: 54.h,
-                                          width: 260.w,
-                                          child: Center(
+                                        const Spacer(),
+                                        GestureDetector(
+                                          onTap: () {
+                                            loadSlots();
+                                            Navigator.pop(context);
+                                          },
+                                          behavior: HitTestBehavior.translucent,
+                                          child: Container(
+                                            height: 54.h,
+                                            width: 295.w,
+                                            alignment: Alignment.center,
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFF084B7F),
+                                              borderRadius:
+                                                  BorderRadius.circular(6.r),
+                                            ),
                                             child: Text(
-                                              'Edit your appointment',
+                                              'Done',
                                               style: GoogleFonts.rubik(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w400,
-                                                color: const Color(0xFF677294),
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.white,
                                               ),
                                               textScaleFactor: 1.sp,
                                             ),
                                           ),
                                         ),
-                                      ),
-                                      const Spacer(),
-                                    ],
+                                        SizedBox(height: 10.h),
+                                        GestureDetector(
+                                          onTap: () {
+                                            //
+                                          },
+                                          behavior: HitTestBehavior.translucent,
+                                          child: SizedBox(
+                                            height: 54.h,
+                                            width: 260.w,
+                                            child: Center(
+                                              child: Text(
+                                                'Edit your appointment',
+                                                style: GoogleFonts.rubik(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w400,
+                                                  color:
+                                                      const Color(0xFF677294),
+                                                ),
+                                                textScaleFactor: 1.sp,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        const Spacer(),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      );
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      });
                     });
                   },
-                  title: 'Book Appointment',
+                  title: 'Submit',
                 ),
               ),
               SizedBox(height: 30.h),
               Center(
                 child: CustomButton(
                   onTap: () {
-                    //
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (ctx) => const PatientAppointments()));
                   },
-                  title: 'View Appointments',
+                  title: 'Appointments',
                   color: const Color(0xFF005292),
                 ),
               ),
@@ -426,9 +439,9 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
         dateTime.year,
         dateTime.month,
         dateTime.day,
-        selectedSlot == null ? dateTime.hour : selectedSlot!.startTime.hour,
-        selectedSlot == null ? dateTime.minute : selectedSlot!.startTime.minute,
-        selectedSlot == null ? dateTime.second : selectedSlot!.startTime.second,
+        selectedSlot!.startTime.hour,
+        selectedSlot!.startTime.minute,
+        selectedSlot!.startTime.second,
       );
       if (kDebugMode) {
         print('dateTime: ${dateTime.toIso8601String()}');

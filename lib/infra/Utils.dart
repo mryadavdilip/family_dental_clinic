@@ -83,7 +83,6 @@ class Utils {
 
   confirmationDialog(
       {required String title, required Function onConfirm}) async {
-    bool result = false;
     showCupertinoDialog(
         context: context,
         builder: (ctx) {
@@ -112,7 +111,7 @@ class Utils {
                       ),
                       CustomFormButton(
                         onTap: () {
-                          result = true;
+                          onConfirm();
                           Navigator.pop(context);
                         },
                         width: 140.w,
@@ -124,11 +123,7 @@ class Utils {
               ),
             ),
           );
-        }).then((value) async {
-      if (result) {
-        onConfirm();
-      }
-    });
+        });
   }
 
   getOrdinal({required int number}) {
@@ -148,18 +143,11 @@ class Utils {
     }
   }
 
-  Future<String> generateId(QuerySnapshot snapshot) async {
+  Future<String> generateId(String path) async {
     int max = 0;
 
-    await _firestore.collection(pathName.users).get().then((snapshot) {
-      snapshot.docs;
-
-      for (int i = 0; i < snapshot.docs.length - 1; i++) {
-        if (int.parse(snapshot.docs[i].get(fieldAndKeyName.id)) <
-            int.parse(snapshot.docs[i + 1].get(fieldAndKeyName.id))) {
-          max = int.parse(snapshot.docs[i + 1].get(fieldAndKeyName.id));
-        }
-      }
+    await _firestore.collection(path).get().then((snapshot) {
+      max = snapshot.size;
     }).catchError((e) {});
 
     if (kDebugMode) {

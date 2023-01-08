@@ -147,7 +147,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   onTap: () {
                     Utils(context).confirmationDialog(
                         title: messages.editProfileConfirmation,
-                        onConfirm: () {
+                        onConfirm: () async {
                           AuthController(context).updateProfile(
                             name:
                                 '${_firstNameEditingController.text} ${_lastNameEditingController.text}',

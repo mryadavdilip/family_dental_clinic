@@ -1,4 +1,9 @@
+import 'package:family_dental_clinic/Authentication/auth_controller.dart';
+import 'package:flutter/cupertino.dart';
+
 class PathName {
+  final BuildContext? context;
+  PathName([this.context]);
   final String staticData = 'static_data';
   final String signupForm = 'signup_form';
   final String clinicDetails = 'clinic_details';
@@ -6,6 +11,9 @@ class PathName {
   final String services = 'Services';
   final String userProfilePictures = 'userProfilePictures';
   final String appointments = 'appointments';
+  String getAppointmentPath(String id) {
+    return '${AuthController(context!).currentUser!.email!}$id';
+  }
 }
 
 final PathName pathName = PathName();
@@ -27,6 +35,7 @@ class FieldAndKeyName {
   final String profilePicture = 'profilePicture';
   final String userRole = 'userRole';
   final String time = 'time';
+  final String status = 'status';
 }
 
 final FieldAndKeyName fieldAndKeyName = FieldAndKeyName();
@@ -59,6 +68,8 @@ class Messages {
       'Are you sure, you want to upload profile picture?';
   String get editProfileConfirmation =>
       'Are you sure, you want to update profile?';
+  String get cancelAppointmentConfirmation =>
+      'Are you sure, you want to cancel appointment?';
 }
 
 final Messages messages = Messages();
@@ -91,4 +102,12 @@ class UserData {
     required this.gender,
     required this.userRole,
   });
+}
+
+enum AppointmentStatus {
+  confirm,
+  cancelled,
+  cancelledByDoctor,
+  visited,
+  expired,
 }

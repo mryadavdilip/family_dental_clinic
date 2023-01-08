@@ -79,12 +79,11 @@ class AuthController {
     } else if (password != confirmPassword) {
       Fluttertoast.showToast(msg: messages.passwordDoesNotMatch);
     } else {
-      QuerySnapshot ss = await _firestore.collection(pathName.users).get();
       _auth
           .createUserWithEmailAndPassword(email: email, password: password)
           .then((credential) async {
         _firestore.collection(pathName.users).doc(credential.user!.email).set({
-          fieldAndKeyName.id: await Utils(context).generateId(ss),
+          fieldAndKeyName.id: await Utils(context).generateId(pathName.users),
           fieldAndKeyName.email: credential.user!.email,
           fieldAndKeyName.name: name,
           fieldAndKeyName.phone: phone,
