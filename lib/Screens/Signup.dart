@@ -36,12 +36,10 @@ class _SignupPageState extends State<SignupPage> {
       TextEditingController();
 
   Set<String> gendersList = {};
-  String selectedGender = '';
 
   @override
   void initState() {
     _loadDropdowns();
-    _phoneEditingController.text = '+91';
     super.initState();
   }
 
@@ -87,12 +85,14 @@ class _SignupPageState extends State<SignupPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       CustomFormTextField(
+                        fieldType: CustomFormTextFieldType.name,
                         width: 140.w,
                         controller: _firstNameEditingController,
                         lableText: 'First Name',
                         hintText: 'First Name',
                       ),
                       CustomFormTextField(
+                        fieldType: CustomFormTextFieldType.name,
                         width: 140.w,
                         controller: _lastNameEditingController,
                         lableText: 'Surname',
@@ -103,9 +103,9 @@ class _SignupPageState extends State<SignupPage> {
                 ),
                 SizedBox(height: 30.h),
                 CustomFormTextField(
+                  fieldType: CustomFormTextFieldType.phone,
                   controller: _phoneEditingController,
                   lableText: 'Phone Number',
-                  hintText: '+91',
                 ),
                 SizedBox(height: 30.h),
                 CustomFormTextField(
@@ -153,7 +153,7 @@ class _SignupPageState extends State<SignupPage> {
                   },
                   title: 'Sign up',
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 20.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -202,7 +202,7 @@ class _SignupPageState extends State<SignupPage> {
         .then((data) {
       data.data()?[fieldAndKeyName.gendersList].forEach((e) {
         gendersList.add(e[fieldAndKeyName.description].toString());
-        selectedGender = gendersList.first;
+        _genderEditingController.text = gendersList.first;
         setState(() {});
       });
     });

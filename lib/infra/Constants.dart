@@ -19,7 +19,6 @@ class FieldAndKeyName {
   final String name = 'name';
   final String phone = 'phone';
   final String email = 'email';
-  final String password = 'password';
   final String dateOfBirth = 'dateOfBirth';
   final String gender = 'gender';
   final String lastLogin = 'lastLogin';
@@ -43,6 +42,7 @@ class Messages {
       'Password and confirm password does not match';
   final String invalidPhone = 'Invalid phone';
   final String accountCreatedSuccessfully = 'Account created successfully';
+  final String profileUpdatedSuccessfully = 'Profile updated successfully';
   final String signedInSuccessfully = 'Signed in successfully';
   final String resetRequestSentToYourEmail = 'Reset request sent to your email';
   final String loggedOutSuccessfully = 'Logged out successfully';
@@ -53,6 +53,10 @@ class Messages {
   String get cannotLaunchUrl => 'Cannot launch: $url';
   String get cannotDial => 'Cannot dial: ${url!.path}';
   String get cannotSendEmail => 'Cannot send email to: $url';
+  String get profilePictureConfirmation =>
+      'Are you sure, you want to upload profile picture?';
+  String get editProfileConfirmation =>
+      'Are you sure, you want to update profile?';
 }
 
 final Messages messages = Messages();

@@ -2,10 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomFormHeader.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomProfilePicture.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
+import 'package:family_dental_clinic/infra/Utils.dart';
 import 'package:family_dental_clinic/provider/AdminDataProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:family_dental_clinic/Authentication/auth_controller.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomFormButton.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomFormTextField.dart';
@@ -24,10 +24,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  final TextEditingController _passwordEditingController =
-      TextEditingController();
-  final TextEditingController _confPasswordEditingController =
-      TextEditingController();
   final TextEditingController _firstNameEditingController =
       TextEditingController();
   final TextEditingController _lastNameEditingController =
@@ -51,7 +47,8 @@ class _ProfilePageState extends State<ProfilePage> {
     _firstNameEditingController.text = userData!.name.split(' ').first;
     _lastNameEditingController.text = userData!.name.split(' ').last;
     _phoneEditingController.text = userData!.phone;
-    _dobEditingController.text = userData!.dateOfBirth;
+    _dobEditingController.text =
+        DateFormat('dd/MM/yyyy').format(DateTime.parse(userData!.dateOfBirth));
     _genderEditingController.text = userData!.gender;
     _addressEditingController.text = userData!.address;
     super.initState();
@@ -83,26 +80,12 @@ class _ProfilePageState extends State<ProfilePage> {
                     children: [
                       CustomProfilePicture(url: userData!.profilePicture),
                       Icon(
-                        Icons.photo_camera,
+                        Icons.photo_camera_outlined,
                         size: 30.sp,
-                        color: Colors.white,
+                        color: Colors.black,
                       ),
                     ],
                   ),
-                ),
-                SizedBox(height: 30.h),
-                CustomFormTextField(
-                  controller: _passwordEditingController,
-                  fieldType: CustomFormTextFieldType.password,
-                  lableText: 'Password',
-                  hintText: 'Password',
-                ),
-                SizedBox(height: 30.h),
-                CustomFormTextField(
-                  controller: _confPasswordEditingController,
-                  fieldType: CustomFormTextFieldType.password,
-                  lableText: 'Confirm Password',
-                  hintText: 'Confirm Password',
                 ),
                 SizedBox(height: 30.h),
                 Padding(
@@ -111,12 +94,14 @@ class _ProfilePageState extends State<ProfilePage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       CustomFormTextField(
+                        fieldType: CustomFormTextFieldType.name,
                         width: 140.w,
                         controller: _firstNameEditingController,
                         lableText: 'First Name',
                         hintText: 'First Name',
                       ),
                       CustomFormTextField(
+                        fieldType: CustomFormTextFieldType.name,
                         width: 140.w,
                         controller: _lastNameEditingController,
                         lableText: 'Surname',
@@ -127,9 +112,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 SizedBox(height: 30.h),
                 CustomFormTextField(
+                  fieldType: CustomFormTextFieldType.phone,
                   controller: _phoneEditingController,
                   lableText: 'Phone Number',
-                  hintText: '+91',
                 ),
                 SizedBox(height: 30.h),
                 CustomFormTextField(
@@ -160,53 +145,23 @@ class _ProfilePageState extends State<ProfilePage> {
                 SizedBox(height: 40.h),
                 CustomFormButton(
                   onTap: () {
-                    AuthController(context).updateProfile(
-                      password: _passwordEditingController.text,
-                      confirmPassword: _confPasswordEditingController.text,
-                      name:
-                          '${_firstNameEditingController.text} ${_lastNameEditingController.text}',
-                      phone: _phoneEditingController.text,
-                      dateOfBirth: DateFormat('dd/MM/yyyy')
-                          .parse(_dobEditingController.text)
-                          .toIso8601String(),
-                      gender: _genderEditingController.text,
-                      gendersList: gendersList,
-                      address: _addressEditingController.text,
-                    );
+                    Utils(context).confirmationDialog(
+                        title: messages.editProfileConfirmation,
+                        onConfirm: () {
+                          AuthController(context).updateProfile(
+                            name:
+                                '${_firstNameEditingController.text} ${_lastNameEditingController.text}',
+                            phone: _phoneEditingController.text,
+                            dateOfBirth: DateFormat('dd/MM/yyyy')
+                                .parse(_dobEditingController.text)
+                                .toIso8601String(),
+                            gender: _genderEditingController.text,
+                            gendersList: gendersList,
+                            address: _addressEditingController.text,
+                          );
+                        });
                   },
                   title: 'Submit',
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Already have an account? ",
-                      style: GoogleFonts.roboto(
-                        fontSize: 16.sp,
-                        color: Colors.blueGrey,
-                        fontWeight: FontWeight.w600,
-                        decoration: TextDecoration.underline,
-                        decorationColor: Colors.blueGrey,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                      behavior: HitTestBehavior.translucent,
-                      child: Text(
-                        "Login here",
-                        style: GoogleFonts.roboto(
-                          fontSize: 16.sp,
-                          color: Colors.blue,
-                          fontWeight: FontWeight.w600,
-                          decoration: TextDecoration.underline,
-                          decorationColor: Colors.blueGrey,
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
                 SizedBox(height: 20.h),
               ],

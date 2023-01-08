@@ -50,7 +50,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 },
                 title: 'Send Request',
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20.h),
               GestureDetector(
                 onTap: () {
                   Navigator.pop(context);

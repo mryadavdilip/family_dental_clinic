@@ -8,14 +8,14 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:family_dental_clinic/Screens/Login.dart';
 import 'package:family_dental_clinic/Screens/HomePage/HomePage.dart';
 
-class NavigationPage extends StatefulWidget {
-  const NavigationPage({Key? key}) : super(key: key);
+class Navigation extends StatefulWidget {
+  const Navigation({Key? key}) : super(key: key);
 
   @override
-  State<NavigationPage> createState() => _NavigationPageState();
+  State<Navigation> createState() => _NavigationState();
 }
 
-class _NavigationPageState extends State<NavigationPage> {
+class _NavigationState extends State<Navigation> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(

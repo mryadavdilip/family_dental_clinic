@@ -1,19 +1,15 @@
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:family_dental_clinic/CustomWidgets/CustomFormButton.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
 import 'package:family_dental_clinic/infra/Utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/material.dart';
-import 'package:family_dental_clinic/NavigationPage.dart';
+import 'package:family_dental_clinic/navigation.dart';
 import 'package:image_picker/image_picker.dart';
 
 class AuthController {
@@ -42,7 +38,7 @@ class AuthController {
           Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(
-                builder: (context) => const NavigationPage(),
+                builder: (context) => const Navigation(),
               ),
               (route) => false);
         }).onError((error, stackTrace) {
@@ -90,7 +86,6 @@ class AuthController {
         _firestore.collection(pathName.users).doc(credential.user!.email).set({
           fieldAndKeyName.id: await generateId(ss),
           fieldAndKeyName.email: credential.user!.email,
-          fieldAndKeyName.password: password,
           fieldAndKeyName.name: name,
           fieldAndKeyName.phone: phone,
           fieldAndKeyName.dateOfBirth: dateOfBirth,
@@ -101,16 +96,14 @@ class AuthController {
           fieldAndKeyName.userRole: UserRole.patient.name,
           fieldAndKeyName.description: '',
         }).then((value) async {
-          await _auth.currentUser?.updateDisplayName(name);
-          await _auth.currentUser?.updateEmail(email);
-          await _auth.currentUser?.updatePassword(password);
-          // await verifyPhone(phone);
+          await currentUser?.updateDisplayName(name);
+          await currentUser?.updateEmail(email);
         });
       }).then((value) {
         Fluttertoast.showToast(msg: messages.accountCreatedSuccessfully);
         Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (ctx) => const NavigationPage()),
+            MaterialPageRoute(builder: (ctx) => const Navigation()),
             (r) => false);
       }).onError((error, stackTrace) {
         Fluttertoast.showToast(msg: error.toString());
@@ -122,15 +115,31 @@ class AuthController {
   }
 
   updateProfile({
-    required String password,
-    required String confirmPassword,
     required String name,
     required String phone,
     required String dateOfBirth,
     required String gender,
     required Set<String> gendersList,
     required String address,
-  }) {}
+  }) async {
+    _firestore.collection(pathName.users).doc(currentUser!.email).update({
+      fieldAndKeyName.name: name,
+      fieldAndKeyName.phone: phone,
+      fieldAndKeyName.dateOfBirth: dateOfBirth,
+      fieldAndKeyName.gender: gender,
+      fieldAndKeyName.address: address,
+      fieldAndKeyName.userRole: UserRole.patient.name,
+      fieldAndKeyName.description: '',
+    }).then((value) async {
+      await currentUser?.updateDisplayName(name);
+    }).then((value) {
+      Fluttertoast.showToast(msg: messages.profileUpdatedSuccessfully);
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (ctx) => const Navigation()),
+          (r) => false);
+    });
+  }
 
   Future<PhoneAuthCredential> verifyPhone(String phone) async {
     PhoneAuthCredential? credential;
@@ -151,7 +160,7 @@ class AuthController {
       },
     )
         .then((value) {
-      _auth.currentUser!.updatePhoneNumber(credential!).then((_) {
+      currentUser!.updatePhoneNumber(credential!).then((_) {
         Fluttertoast.showToast(msg: messages.phoneUpdated);
       });
     });
@@ -160,8 +169,8 @@ class AuthController {
 
   signInWithGoogle() async {
     await GoogleSignIn().signIn().then((value) {
-      Navigator.pushReplacement(context,
-          MaterialPageRoute(builder: (context) => const NavigationPage()));
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => const Navigation()));
       Fluttertoast.showToast(msg: messages.signedInSuccessfully);
     }).catchError((e) {
       Fluttertoast.showToast(msg: e.toString());
@@ -183,7 +192,7 @@ class AuthController {
           Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(
-                builder: (context) => const NavigationPage(),
+                builder: (context) => const Navigation(),
               ),
               (route) => false);
           Fluttertoast.showToast(msg: messages.resetRequestSentToYourEmail);
@@ -205,7 +214,7 @@ class AuthController {
         Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
-              builder: (context) => const NavigationPage(),
+              builder: (context) => const Navigation(),
             ),
             (route) => false);
         Fluttertoast.showToast(msg: messages.loggedOutSuccessfully);
@@ -219,7 +228,7 @@ class AuthController {
 
   Future<bool> isSignedIn() async {
     bool signedInWithGoogle = await GoogleSignIn().isSignedIn();
-    bool signedInWithEmailAndPassword = _auth.currentUser != null;
+    bool signedInWithEmailAndPassword = currentUser != null;
     return signedInWithGoogle || signedInWithEmailAndPassword;
   }
 
@@ -252,58 +261,16 @@ class AuthController {
       requestFullMetadata: false,
     )
         .then((image) {
-      bool update = false;
       if (image != null) {
-        showCupertinoDialog(
-            context: context,
-            builder: (ctx) {
-              return Padding(
-                padding:
-                    EdgeInsets.symmetric(vertical: 350.h, horizontal: 30.w),
-                child: Material(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10.r),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Text(
-                        'Are you sure, you want to upload profile picture?',
-                        textScaleFactor: 1.sp,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          CustomFormButton(
-                            onTap: () {
-                              Navigator.pop(context);
-                            },
-                            width: 140.w,
-                            title: 'Cancel',
-                            outlined: true,
-                          ),
-                          CustomFormButton(
-                            onTap: () {
-                              update = true;
-                              Navigator.pop(context);
-                            },
-                            width: 140.w,
-                            title: 'Confirm',
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }).then((value) async {
-          if (update) {
+        Utils(context).confirmationDialog(
+          title: messages.profilePictureConfirmation,
+          onConfirm: () async {
             storageRef
-                .child(
-                    '${pathName.userProfilePictures}/${_auth.currentUser!.email}')
+                .child('${pathName.userProfilePictures}/${currentUser!.email}')
                 .putData(await image.readAsBytes())
                 .then((snapshot) {
               snapshot.ref.getDownloadURL().then((url) {
-                _auth.currentUser?.updatePhotoURL(url).then((v) {
+                currentUser?.updatePhotoURL(url).then((v) {
                   Fluttertoast.showToast(
                       msg: messages.profilePictureUpdatedSuccessfully);
                 }).catchError((e) {
@@ -311,7 +278,7 @@ class AuthController {
                 });
                 _firestore
                     .collection(pathName.users)
-                    .doc(_auth.currentUser!.email)
+                    .doc(currentUser!.email)
                     .update({
                   fieldAndKeyName.profilePicture: url,
                 });
@@ -319,8 +286,8 @@ class AuthController {
                 Utils(context).syncUserData();
               });
             });
-          }
-        });
+          },
+        );
       }
     });
   }

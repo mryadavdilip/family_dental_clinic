@@ -2,10 +2,13 @@ import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:family_dental_clinic/Authentication/auth_controller.dart';
+import 'package:family_dental_clinic/CustomWidgets/CustomFormButton.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
 import 'package:family_dental_clinic/provider/AdminDataProvider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:provider/provider.dart';
@@ -75,6 +78,56 @@ class Utils {
     Uri url = Uri.parse('mailto:$email');
     launchUrl(url).catchError((e) {
       Fluttertoast.showToast(msg: e.toString());
+    });
+  }
+
+  confirmationDialog(
+      {required String title, required Function onConfirm}) async {
+    bool result = false;
+    showCupertinoDialog(
+        context: context,
+        builder: (ctx) {
+          return Padding(
+            padding: EdgeInsets.symmetric(vertical: 350.h, horizontal: 30.w),
+            child: Material(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10.r),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Text(
+                    title,
+                    textScaleFactor: 1.sp,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      CustomFormButton(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        width: 140.w,
+                        title: 'Cancel',
+                        outlined: true,
+                      ),
+                      CustomFormButton(
+                        onTap: () {
+                          result = true;
+                          Navigator.pop(context);
+                        },
+                        width: 140.w,
+                        title: 'Confirm',
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        }).then((value) async {
+      if (result) {
+        onConfirm();
+      }
     });
   }
 }

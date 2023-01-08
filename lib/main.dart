@@ -2,7 +2,7 @@ import 'package:family_dental_clinic/provider/AdminDataProvider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:family_dental_clinic/NavigationPage.dart';
+import 'package:family_dental_clinic/navigation.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -26,11 +26,12 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
+    // AuthController(context).signout();
     return ScreenUtilInit(
       designSize: const Size(375, 812),
       builder: (context, child) => const MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: NavigationPage(),
+        home: Navigation(),
       ),
     );
   }

@@ -1,11 +1,13 @@
 import 'package:family_dental_clinic/CustomWidgets/CustomFormButton.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 enum CustomFormTextFieldType {
   text,
+  name,
   email,
   password,
   phone,
@@ -82,7 +84,16 @@ class _CustomFormTextFieldState extends State<CustomFormTextField> {
                     : null,
             cursorColor: Colors.blueGrey,
             obscureText: obscureText,
+            inputFormatters: [
+              if (widget.fieldType == CustomFormTextFieldType.name)
+                FilteringTextInputFormatter.deny(RegExp(r'\s')),
+              if (widget.fieldType == CustomFormTextFieldType.phone)
+                FilteringTextInputFormatter.digitsOnly,
+            ],
             decoration: InputDecoration(
+              prefixText: widget.fieldType == CustomFormTextFieldType.phone
+                  ? '+91'
+                  : '',
               suffixIcon: widget.fieldType == CustomFormTextFieldType.password
                   ? GestureDetector(
                       onTap: () {
