@@ -1,4 +1,5 @@
 import 'package:family_dental_clinic/Authentication/auth_controller.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 
 class PathName {
@@ -11,6 +12,7 @@ class PathName {
   final String services = 'Services';
   final String userProfilePictures = 'userProfilePictures';
   final String appointments = 'appointments';
+  final String images = 'images';
   String getAppointmentPath(int appointmentId) {
     return '${AuthController(context!).currentUser!.email!}$appointmentId';
   }
@@ -117,8 +119,15 @@ enum AppointmentStatus {
 }
 
 class Constants {
-  static const String defaultProfilePicture =
+  static String defaultProfilePicture =
       'https://firebasestorage.googleapis.com/v0/b/family-dental-clinic-2c2cb.appspot.com/o/images%2Flogo.png?alt=media&token=98835217-5625-4595-a36f-6dc29908114b';
+  Constants() {
+    FirebaseStorage.instance
+        .ref(pathNames.images)
+        .child('logo.png')
+        .getDownloadURL()
+        .then((url) => defaultProfilePicture = url);
+  }
 
   String get getDefaultProfilePicture => defaultProfilePicture;
 }
