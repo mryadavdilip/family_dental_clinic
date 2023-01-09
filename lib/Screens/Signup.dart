@@ -196,8 +196,8 @@ class _SignupPageState extends State<SignupPage> {
 
   _loadDropdowns() {
     _firestore
-        .collection(pathName.staticData)
-        .doc(pathName.signupForm)
+        .collection(pathNames.staticData)
+        .doc(pathNames.signupForm)
         .get()
         .then((data) {
       data.data()?[fieldAndKeyName.gendersList].forEach((e) {

@@ -4,11 +4,13 @@ import 'package:family_dental_clinic/CustomWidgets/CustomProfilePicture.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
 import 'package:family_dental_clinic/infra/Utils.dart';
 import 'package:family_dental_clinic/provider/AdminDataProvider.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:family_dental_clinic/Authentication/auth_controller.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomFormButton.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomFormTextField.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -164,6 +166,39 @@ class _ProfilePageState extends State<ProfilePage> {
                   title: 'Submit',
                 ),
                 SizedBox(height: 20.h),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 25.w),
+                  child: RichText(
+                    text: TextSpan(
+                      text: "To delete your account and data with FDC, ",
+                      style: GoogleFonts.roboto(
+                        fontSize: 16.sp,
+                        color: Colors.blueGrey,
+                        fontWeight: FontWeight.w600,
+                        decoration: TextDecoration.underline,
+                        decorationColor: Colors.blueGrey,
+                      ),
+                      children: [
+                        TextSpan(
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              AuthController(context).deleteAccount();
+                            },
+                          text: "Click here",
+                          style: GoogleFonts.roboto(
+                            fontSize: 16.sp,
+                            color: Colors.blue,
+                            fontWeight: FontWeight.w600,
+                            decoration: TextDecoration.underline,
+                            decorationColor: Colors.blueGrey,
+                          ),
+                        ),
+                      ],
+                    ),
+                    textScaleFactor: 1.sp,
+                  ),
+                ),
+                SizedBox(height: 20.h),
               ],
             ),
           ),
@@ -174,8 +209,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
   _loadDropdowns() {
     _firestore
-        .collection(pathName.staticData)
-        .doc(pathName.signupForm)
+        .collection(pathNames.staticData)
+        .doc(pathNames.signupForm)
         .get()
         .then((data) {
       data.data()?[fieldAndKeyName.gendersList].forEach((e) {

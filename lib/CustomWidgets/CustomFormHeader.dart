@@ -17,6 +17,7 @@ class CustomFormHeader extends StatelessWidget {
             color: Colors.blueGrey,
             fontWeight: FontWeight.w600,
           ),
+          textAlign: TextAlign.center,
         ),
         SizedBox(height: 10.h),
         Container(

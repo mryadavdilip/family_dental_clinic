@@ -242,16 +242,16 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                 child: CustomButton(
                   onTap: () async {
                     Utils(context)
-                        .generateId(pathName.appointments)
+                        .generateId(pathNames.appointments)
                         .then((appointmentId) {
                       _firestore
-                          .collection(pathName.appointments)
+                          .collection(pathNames.appointments)
                           .doc(PathName(context)
                               .getAppointmentPath(appointmentId))
                           .set({
-                        fieldAndKeyName.id: appointmentId,
-                        fieldAndKeyName.email:
-                            AuthController(context).currentUser!.email,
+                        fieldAndKeyName.appointmentId: appointmentId,
+                        fieldAndKeyName.uid:
+                            AuthController(context).currentUser!.uid,
                         fieldAndKeyName.time: dateTime.toIso8601String(),
                         fieldAndKeyName.status: AppointmentStatus.confirm.name,
                       }).then((value) {
@@ -396,7 +396,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
   loadSlots() async {
     slotTimesList.clear();
     QuerySnapshot appointmentsSnapshot =
-        await _firestore.collection(pathName.appointments).get();
+        await _firestore.collection(pathNames.appointments).get();
 
     DateTime startTime =
         DateTime(dateTime.year, dateTime.month, dateTime.day, 10, 0, 0);

@@ -7,7 +7,7 @@ class UserDataProvider extends ChangeNotifier {
   UserData get getUserData =>
       userData ??
       UserData(
-        id: '',
+        uid: '',
         email: '',
         name: '',
         dateOfBirth: '',

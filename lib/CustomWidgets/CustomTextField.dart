@@ -89,6 +89,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
             ),
             readOnly: widget.readOnly || widget.isDatePicker,
             decoration: InputDecoration(
+              isDense: true,
               hintText: widget.hintText,
               hintStyle: GoogleFonts.inter(
                 fontSize: 16,

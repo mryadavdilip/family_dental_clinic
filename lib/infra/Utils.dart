@@ -20,13 +20,13 @@ class Utils {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   Future<UserData> syncUserData() async {
     UserData userData = await _firestore
-        .collection(pathName.users)
+        .collection(pathNames.users)
         .doc(AuthController(context).currentUser?.email)
         .get()
         .then((doc) {
       Provider.of<UserDataProvider>(context, listen: false)
           .setUserData(UserData(
-        id: doc.get(fieldAndKeyName.id),
+        uid: doc.get(fieldAndKeyName.uid),
         email: doc.get(fieldAndKeyName.email),
         name: doc.get(fieldAndKeyName.name),
         dateOfBirth: doc.get(fieldAndKeyName.dateOfBirth),
@@ -97,6 +97,7 @@ class Utils {
                   Text(
                     title,
                     textScaleFactor: 1.sp,
+                    textAlign: TextAlign.center,
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -143,7 +144,7 @@ class Utils {
     }
   }
 
-  Future<String> generateId(String path) async {
+  Future<int> generateId(String path) async {
     int max = 0;
 
     await _firestore.collection(path).get().then((snapshot) {
@@ -153,7 +154,7 @@ class Utils {
     if (kDebugMode) {
       print('max id in firestore: $max');
     }
-    return '${max + 1}';
+    return max + 1;
   }
 
   String? getMonthName(int month) {

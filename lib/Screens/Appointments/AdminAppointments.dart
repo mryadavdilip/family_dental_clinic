@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:family_dental_clinic/Authentication/auth_controller.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomIconButton.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomLableText.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
@@ -149,14 +148,15 @@ class _AdminAppointmentsState extends State<AdminAppointments> {
                                         onConfirm: () {
                                           String docId = '';
                                           FirebaseFirestore.instance
-                                              .collection(pathName.appointments)
+                                              .collection(
+                                                  pathNames.appointments)
                                               .get()
                                               .then((ss) {
                                             if (ss.docs.isNotEmpty) {
                                               for (QueryDocumentSnapshot doc
                                                   in ss.docs) {
-                                                if (doc.get(
-                                                        fieldAndKeyName.id) ==
+                                                if (doc.get(fieldAndKeyName
+                                                        .appointmentId) ==
                                                     appointmentsResponseList[
                                                             index]
                                                         .appointmentId) {
@@ -167,7 +167,7 @@ class _AdminAppointmentsState extends State<AdminAppointments> {
                                           }).then((value) {
                                             FirebaseFirestore.instance
                                                 .collection(
-                                                    pathName.appointments)
+                                                    pathNames.appointments)
                                                 .doc(docId)
                                                 .update({
                                               fieldAndKeyName.status:
@@ -221,16 +221,16 @@ class _AdminAppointmentsState extends State<AdminAppointments> {
   _loadData() async {
     appointmentsResponseList.clear();
     await FirebaseFirestore.instance
-        .collection(pathName.appointments)
-        .orderBy(fieldAndKeyName.id, descending: true)
+        .collection(pathNames.appointments)
         .get()
         .then((appointmentsSnapshot) {
       if (appointmentsSnapshot.docs.isNotEmpty) {
         for (QueryDocumentSnapshot doc in appointmentsSnapshot.docs) {
           appointmentsResponseList.add(AppointmentsResponse(
-            appointmentId: doc.get(fieldAndKeyName.id),
+            appointmentId: doc.get(fieldAndKeyName.appointmentId),
             time: DateTime.parse(doc.get(fieldAndKeyName.time)),
             status: doc.get(fieldAndKeyName.status),
+            uid: doc.get(fieldAndKeyName.uid),
           ));
         }
       }

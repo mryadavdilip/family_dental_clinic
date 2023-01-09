@@ -148,7 +148,8 @@ class _PatientAppointmentsState extends State<PatientAppointments> {
                                       Utils(context).confirmationDialog(
                                         onConfirm: () {
                                           FirebaseFirestore.instance
-                                              .collection(pathName.appointments)
+                                              .collection(
+                                                  pathNames.appointments)
                                               .doc(PathName(context)
                                                   .getAppointmentPath(
                                                       appointmentsResponseList[
@@ -205,20 +206,19 @@ class _PatientAppointmentsState extends State<PatientAppointments> {
   _loadData() async {
     appointmentsResponseList.clear();
     await FirebaseFirestore.instance
-        .collection(pathName.appointments)
-        .orderBy(fieldAndKeyName.id, descending: true)
+        .collection(pathNames.appointments)
+        .where(fieldAndKeyName.uid,
+            isEqualTo: AuthController(context).currentUser!.uid)
         .get()
         .then((appointmentsSnapshot) {
       if (appointmentsSnapshot.docs.isNotEmpty) {
         for (QueryDocumentSnapshot doc in appointmentsSnapshot.docs) {
-          if (doc.get(fieldAndKeyName.email) ==
-              AuthController(context).currentUser!.email) {
-            appointmentsResponseList.add(AppointmentsResponse(
-              appointmentId: doc.get(fieldAndKeyName.id),
-              time: DateTime.parse(doc.get(fieldAndKeyName.time)),
-              status: doc.get(fieldAndKeyName.status),
-            ));
-          }
+          appointmentsResponseList.add(AppointmentsResponse(
+            appointmentId: doc.get(fieldAndKeyName.appointmentId),
+            time: DateTime.parse(doc.get(fieldAndKeyName.time)),
+            status: doc.get(fieldAndKeyName.status),
+            uid: doc.get(fieldAndKeyName.uid),
+          ));
         }
       }
     }).then((value) {

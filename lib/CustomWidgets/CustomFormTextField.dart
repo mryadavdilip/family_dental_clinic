@@ -91,6 +91,7 @@ class _CustomFormTextFieldState extends State<CustomFormTextField> {
                 FilteringTextInputFormatter.digitsOnly,
             ],
             decoration: InputDecoration(
+              isDense: true,
               prefixText: widget.fieldType == CustomFormTextFieldType.phone
                   ? '+91'
                   : '',

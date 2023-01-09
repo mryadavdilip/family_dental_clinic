@@ -4,7 +4,6 @@ import 'package:family_dental_clinic/Authentication/auth_controller.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomAppBar.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomAppointmentsButton.dart';
 import 'package:family_dental_clinic/Screens/Appointments/AdminAppointments.dart';
-import 'package:family_dental_clinic/Screens/Appointments/PatientAppointments.dart';
 import 'package:family_dental_clinic/Screens/Appointments/BookAppointment.dart';
 import 'package:family_dental_clinic/Screens/HomePage/ProfilePage.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
@@ -40,6 +39,7 @@ class _HomePageState extends State<HomePage> {
         'title': 'Profile',
         'icon': Icons.person_outline,
         'action': () {
+          scaffoldKey.currentState!.closeEndDrawer();
           Navigator.push(
             context,
             MaterialPageRoute(builder: (ctx) => const ProfilePage()),
@@ -50,6 +50,7 @@ class _HomePageState extends State<HomePage> {
         'title': widget.isAdmin ? 'Appointments' : 'Book Appointment',
         'icon': Icons.history_outlined,
         'action': () {
+          scaffoldKey.currentState!.closeEndDrawer();
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -204,7 +205,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                       SizedBox(height: 10.h),
                       FutureBuilder(
-                        future: _firestore.collection(pathName.services).get(),
+                        future: _firestore.collection(pathNames.services).get(),
                         builder: (ctx, AsyncSnapshot<QuerySnapshot> snapshot) {
                           return !snapshot.hasData
                               ? const Center(child: CircularProgressIndicator())

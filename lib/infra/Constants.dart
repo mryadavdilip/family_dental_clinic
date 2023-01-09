@@ -11,15 +11,16 @@ class PathName {
   final String services = 'Services';
   final String userProfilePictures = 'userProfilePictures';
   final String appointments = 'appointments';
-  String getAppointmentPath(String id) {
-    return '${AuthController(context!).currentUser!.email!}$id';
+  String getAppointmentPath(int appointmentId) {
+    return '${AuthController(context!).currentUser!.email!}$appointmentId';
   }
 }
 
-final PathName pathName = PathName();
+final PathName pathNames = PathName();
 
 class FieldAndKeyName {
-  final String id = 'id';
+  final String appointmentId = 'appointmentId';
+  final String uid = 'uid';
   final String gendersList = 'gendersList';
   final String address = 'address';
   final String description = 'description';
@@ -70,6 +71,9 @@ class Messages {
       'Are you sure, you want to update profile?';
   String get cancelAppointmentConfirmation =>
       'Are you sure, you want to cancel appointment?';
+  String get deleteAccountConfirmation =>
+      'Data cannot be recovered once deleted!, are you sure you want to continue delete?';
+  String get accountDeleteSuccessful => 'Your account deleted successfully';
 }
 
 final Messages messages = Messages();
@@ -80,7 +84,7 @@ enum UserRole {
 }
 
 class UserData {
-  final String id;
+  final String uid;
   final String name;
   final String address;
   final String description;
@@ -91,7 +95,7 @@ class UserData {
   final String gender;
   final UserRole userRole;
   UserData({
-    required this.id,
+    required this.uid,
     required this.name,
     required this.address,
     required this.description,
@@ -110,4 +114,11 @@ enum AppointmentStatus {
   cancelledByDoctor,
   visited,
   expired,
+}
+
+class Constants {
+  static const String defaultProfilePicture =
+      'https://firebasestorage.googleapis.com/v0/b/family-dental-clinic-2c2cb.appspot.com/o/images%2Flogo.png?alt=media&token=98835217-5625-4595-a36f-6dc29908114b';
+
+  String get getDefaultProfilePicture => defaultProfilePicture;
 }

@@ -1,8 +1,10 @@
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:family_dental_clinic/Screens/SigninVerification.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
 import 'package:family_dental_clinic/infra/Utils.dart';
+import 'package:family_dental_clinic/provider/AdminDataProvider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
@@ -11,6 +13,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/material.dart';
 import 'package:family_dental_clinic/navigation.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 
 class AuthController {
   final BuildContext context;
@@ -18,6 +21,7 @@ class AuthController {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final Reference storageRef = FirebaseStorage.instance.ref();
 
   User? get currentUser => _auth.currentUser;
 
@@ -30,7 +34,7 @@ class AuthController {
             .signInWithEmailAndPassword(email: email, password: password)
             .then((credential) {
           if (credential.user != null) {
-            _firestore.collection(pathName.users).doc(email).update({
+            _firestore.collection(pathNames.users).doc(email).update({
               fieldAndKeyName.lastLogin:
                   "${credential.user?.metadata.lastSignInTime?.toIso8601String()}"
             });
@@ -82,16 +86,15 @@ class AuthController {
       _auth
           .createUserWithEmailAndPassword(email: email, password: password)
           .then((credential) async {
-        _firestore.collection(pathName.users).doc(credential.user!.email).set({
-          fieldAndKeyName.id: await Utils(context).generateId(pathName.users),
+        _firestore.collection(pathNames.users).doc(credential.user!.email).set({
+          fieldAndKeyName.uid: credential.user!.uid,
           fieldAndKeyName.email: credential.user!.email,
           fieldAndKeyName.name: name,
           fieldAndKeyName.phone: phone,
           fieldAndKeyName.dateOfBirth: dateOfBirth,
           fieldAndKeyName.gender: gender,
           fieldAndKeyName.address: address,
-          fieldAndKeyName.profilePicture:
-              'https://firebasestorage.googleapis.com/v0/b/family-dental-clinic-2c2cb.appspot.com/o/userProfilePictures%2Fadmin%40fdc.com?alt=media&token=cdc62642-7907-42f0-bd07-1e131e53a8a8',
+          fieldAndKeyName.profilePicture: Constants().getDefaultProfilePicture,
           fieldAndKeyName.userRole: UserRole.patient.name,
           fieldAndKeyName.description: '',
         }).then((value) async {
@@ -121,7 +124,7 @@ class AuthController {
     required Set<String> gendersList,
     required String address,
   }) async {
-    _firestore.collection(pathName.users).doc(currentUser!.email).update({
+    _firestore.collection(pathNames.users).doc(currentUser!.email).update({
       fieldAndKeyName.name: name,
       fieldAndKeyName.phone: phone,
       fieldAndKeyName.dateOfBirth: dateOfBirth,
@@ -151,8 +154,8 @@ class AuthController {
       verificationFailed: (e) {
         Fluttertoast.showToast(msg: e.toString());
       },
-      codeSent: (id, code) {
-        log('id: $id, code: $code');
+      codeSent: (vid, code) {
+        log('vid: $vid, code: $code');
       },
       codeAutoRetrievalTimeout: (s) {
         Fluttertoast.showToast(msg: s);
@@ -185,7 +188,7 @@ class AuthController {
     } else {
       try {
         _auth.sendPasswordResetEmail(email: email).then((credential) {
-          _firestore.collection(pathName.users).doc(email).update({
+          _firestore.collection(pathNames.users).doc(email).update({
             fieldAndKeyName.lastResetRequest: DateTime.now().toIso8601String()
           });
           Navigator.pushAndRemoveUntil(
@@ -232,8 +235,6 @@ class AuthController {
   }
 
   void setProfilePicture() {
-    final Reference storageRef = FirebaseStorage.instance.ref();
-
     ImagePicker()
         .pickImage(
       source: ImageSource.gallery,
@@ -245,7 +246,7 @@ class AuthController {
           title: messages.profilePictureConfirmation,
           onConfirm: () async {
             storageRef
-                .child('${pathName.userProfilePictures}/${currentUser!.email}')
+                .child('${pathNames.userProfilePictures}/${currentUser!.email}')
                 .putData(await image.readAsBytes())
                 .then((snapshot) {
               snapshot.ref.getDownloadURL().then((url) {
@@ -256,7 +257,7 @@ class AuthController {
                   Fluttertoast.showToast(msg: e.toString());
                 });
                 _firestore
-                    .collection(pathName.users)
+                    .collection(pathNames.users)
                     .doc(currentUser!.email)
                     .update({
                   fieldAndKeyName.profilePicture: url,
@@ -269,5 +270,66 @@ class AuthController {
         );
       }
     });
+  }
+
+  deleteAccount() {
+    String email = currentUser!.email!;
+    String profilePictureUrl =
+        Provider.of<UserDataProvider>(context, listen: false)
+            .getUserData
+            .profilePicture;
+    _auth.signOut().then((value) => Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (ctx) => SigninVerification(
+                  result: (password) async {
+                    await _auth
+                        .signInWithEmailAndPassword(
+                            email: email, password: password)
+                        .then(
+                          (value) => value.user!.delete().then((_) async {
+                            await _firestore
+                                .collection(pathNames.appointments)
+                                .where(fieldAndKeyName.uid,
+                                    isEqualTo: value.user!.uid)
+                                .get()
+                                .then((ss) async {
+                              if (ss.docs.isNotEmpty) {
+                                for (var doc in ss.docs) {
+                                  await _firestore
+                                      .collection(pathNames.appointments)
+                                      .doc(doc.id)
+                                      .delete()
+                                      .then((_) async {
+                                    await _firestore
+                                        .collection(pathNames.users)
+                                        .doc(value.user!.email)
+                                        .delete();
+                                  });
+                                }
+                              }
+                            }).then((_) async {
+                              if (profilePictureUrl !=
+                                  Constants().getDefaultProfilePicture) {
+                                await FirebaseStorage.instance
+                                    .refFromURL(profilePictureUrl)
+                                    .delete()
+                                    .then((value) {
+                                  Navigator.popUntil(
+                                      context, (route) => route.isFirst);
+                                  Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (ctx) =>
+                                              const Navigation()));
+                                  Fluttertoast.showToast(
+                                      msg: messages.accountDeleteSuccessful);
+                                });
+                              }
+                            });
+                          }),
+                        );
+                  },
+                ))));
   }
 }
