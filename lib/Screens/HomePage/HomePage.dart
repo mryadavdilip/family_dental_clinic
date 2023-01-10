@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:family_dental_clinic/Authentication/auth_controller.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomAppBar.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomAppointmentsButton.dart';
-import 'package:family_dental_clinic/Screens/Appointments/AdminAppointments.dart';
+import 'package:family_dental_clinic/Screens/Appointments/AppointmentsHistory.dart';
 import 'package:family_dental_clinic/Screens/Appointments/BookAppointment.dart';
 import 'package:family_dental_clinic/Screens/HomePage/ProfilePage.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
@@ -55,7 +55,7 @@ class _HomePageState extends State<HomePage> {
             context,
             MaterialPageRoute(
                 builder: (ctx) => widget.isAdmin
-                    ? const AdminAppointments()
+                    ? AppointmentsHistory(isAdmin: widget.isAdmin)
                     : const BookAppointmentPage()),
           );
         },
@@ -400,15 +400,18 @@ class _HomePageState extends State<HomePage> {
                         },
                       ),
                       SizedBox(height: 30.h),
-                      Center(
-                        child: CustomButton(
-                          onTap: () {
-                            drawerItems.firstWhere((element) =>
-                                element['title'].toString().toLowerCase() ==
-                                'book appointment')['action']();
-                          },
-                          title: 'Book Appointment',
-                          color: const Color(0xFF005292),
+                      Visibility(
+                        visible: !widget.isAdmin,
+                        child: Center(
+                          child: CustomButton(
+                            onTap: () {
+                              drawerItems.firstWhere((element) =>
+                                  element['title'].toString().toLowerCase() ==
+                                  'book appointment')['action']();
+                            },
+                            title: 'Book Appointment',
+                            color: const Color(0xFF005292),
+                          ),
                         ),
                       ),
                       SizedBox(height: 50.h),

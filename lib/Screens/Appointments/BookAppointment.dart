@@ -6,7 +6,7 @@ import 'package:family_dental_clinic/CustomWidgets/CustomIconButton.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomLableText.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomTextField.dart';
 import 'package:family_dental_clinic/CustomWidgets/DatePickerChip.dart';
-import 'package:family_dental_clinic/Screens/Appointments/PatientAppointments.dart';
+import 'package:family_dental_clinic/Screens/Appointments/AppointmentsHistory.dart';
 import 'package:family_dental_clinic/modules/SlotTimeResponse.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
 import 'package:family_dental_clinic/infra/Utils.dart';
@@ -37,7 +37,6 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
   List<SlotTime> slotTimesList = [];
   SlotTime? selectedSlot;
 
-  final TextEditingController _ageEditingController = TextEditingController();
   final TextEditingController _symptomsEditingController =
       TextEditingController();
 
@@ -95,11 +94,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                           _monthEditingController.text =
                               '${Utils(context).getMonthName(dateTime.month)} ${dateTime.year}';
                         }
-                        _ageEditingController.text = ((DateTime.now()
-                                    .difference(date ?? DateTime.now())
-                                    .inDays) ~/
-                                365)
-                            .toString();
+
                         selectedDate = dateTime.day;
                         setState(() {});
                       },
@@ -139,16 +134,16 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                       child: DatePickerChip(
                         onTap: () {
                           selectedDate = index + 1;
-                          dateTime = DateTime(dateTime.year, dateTime.month,
-                              selectedDate!, 0, 0, 0, 0, 0);
+                          dateTime = DateTime(
+                              dateTime.year, dateTime.month, selectedDate!);
                           setState(() {});
                           loadSlots();
                         },
                         date:
                             '${index + 1}${Utils(context).getOrdinal(number: index + 1)}',
                         day: DateFormat('EEEE')
-                            .format(DateTime(dateTime.year, dateTime.month,
-                                index + 1, 0, 0, 0, 0, 0))
+                            .format(DateTime(
+                                dateTime.year, dateTime.month, index + 1))
                             .toString(),
                         state:
                             DateTime(dateTime.year, dateTime.month, index + 1)
@@ -253,6 +248,8 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                         fieldAndKeyName.uid:
                             AuthController(context).currentUser!.uid,
                         fieldAndKeyName.time: dateTime.toIso8601String(),
+                        fieldAndKeyName.problem:
+                            _symptomsEditingController.text,
                         fieldAndKeyName.status: AppointmentStatus.confirm.name,
                       }).then((value) {
                         showDialog(
@@ -379,7 +376,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (ctx) => const PatientAppointments()));
+                            builder: (ctx) => const AppointmentsHistory()));
                   },
                   title: 'Appointments',
                   color: const Color(0xFF005292),

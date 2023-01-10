@@ -38,6 +38,7 @@ class FieldAndKeyName {
   final String profilePicture = 'profilePicture';
   final String userRole = 'userRole';
   final String time = 'time';
+  final String problem = 'problem';
   final String status = 'status';
 }
 
