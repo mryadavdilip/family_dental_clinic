@@ -193,3 +193,30 @@ class Utils {
     return daysInMonth[month];
   }
 }
+
+class FireStoreUtils {
+  Future<QuerySnapshot> appointmentsByUser(String uid) async {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection(pathNames.appointments)
+        .where(fieldAndKeyName.uid, isEqualTo: uid)
+        .get();
+    return snapshot;
+  }
+
+  Future<QuerySnapshot> getAllUsersAppointments() async {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection(pathNames.appointments)
+        .get();
+    return snapshot;
+  }
+
+  Future<QuerySnapshot> appointmentsByUserAndStatus(
+      String uid, AppointmentStatus status) async {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection(pathNames.appointments)
+        .where(fieldAndKeyName.uid, isEqualTo: uid)
+        .where(fieldAndKeyName.status, isEqualTo: status.name)
+        .get();
+    return snapshot;
+  }
+}

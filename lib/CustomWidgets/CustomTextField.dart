@@ -29,7 +29,7 @@ class CustomTextField extends StatefulWidget {
     this.onChanged,
     this.readOnly = false,
     this.maxLines,
-    this.height = 56,
+    this.height = 60,
     this.keyboardType = TextInputType.text,
     this.fontColor = const Color(0xFFFAC032),
     this.lableWeight = FontWeight.w500,

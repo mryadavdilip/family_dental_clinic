@@ -288,11 +288,8 @@ class AuthController {
                             email: email, password: password)
                         .then(
                           (value) => value.user!.delete().then((_) async {
-                            await _firestore
-                                .collection(pathNames.appointments)
-                                .where(fieldAndKeyName.uid,
-                                    isEqualTo: value.user!.uid)
-                                .get()
+                            await FireStoreUtils()
+                                .appointmentsByUser(value.user!.uid)
                                 .then((ss) async {
                               if (ss.docs.isNotEmpty) {
                                 for (var doc in ss.docs) {

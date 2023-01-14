@@ -4,6 +4,7 @@ import 'package:family_dental_clinic/CustomWidgets/AppointmentsCard.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomIconButton.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomLableText.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
+import 'package:family_dental_clinic/infra/Utils.dart';
 import 'package:family_dental_clinic/modules/AppointmentsResponse.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -57,6 +58,7 @@ class _AppointmentsHistoryState extends State<AppointmentsHistory> {
                       padding: EdgeInsets.zero,
                       itemBuilder: (context, index) {
                         return AppointmentsCard(
+                          isInfoVisible: widget.isAdmin,
                           index: index,
                           response: appointmentsResponseList[index],
                           onCancel: _loadAppointments,
@@ -74,15 +76,10 @@ class _AppointmentsHistoryState extends State<AppointmentsHistory> {
     appointmentsResponseList.clear();
     QuerySnapshot? appointmentsSnapshot;
     if (widget.isAdmin) {
-      appointmentsSnapshot = await FirebaseFirestore.instance
-          .collection(pathNames.appointments)
-          .get();
+      appointmentsSnapshot = await FireStoreUtils().getAllUsersAppointments();
     } else {
-      appointmentsSnapshot = await FirebaseFirestore.instance
-          .collection(pathNames.appointments)
-          .where(fieldAndKeyName.uid,
-              isEqualTo: AuthController(context).currentUser!.uid)
-          .get();
+      appointmentsSnapshot = await FireStoreUtils()
+          .appointmentsByUser(AuthController(context).currentUser!.uid);
     }
 
     if (appointmentsSnapshot.docs.isNotEmpty) {

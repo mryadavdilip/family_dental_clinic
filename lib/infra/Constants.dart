@@ -77,6 +77,8 @@ class Messages {
   String get deleteAccountConfirmation =>
       'Data cannot be recovered once deleted!, are you sure you want to continue delete?';
   String get accountDeleteSuccessful => 'Your account deleted successfully';
+  String get appointmentAlreadyBookedForDate =>
+      'Your appointment is already booked for this date, please choose another date';
 }
 
 final Messages messages = Messages();

@@ -13,6 +13,7 @@ import 'package:family_dental_clinic/infra/Utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -235,136 +236,8 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
               SizedBox(height: 20.h),
               Center(
                 child: CustomButton(
-                  onTap: () async {
-                    Utils(context)
-                        .generateId(pathNames.appointments)
-                        .then((appointmentId) {
-                      _firestore
-                          .collection(pathNames.appointments)
-                          .doc(PathName(context)
-                              .getAppointmentPath(appointmentId))
-                          .set({
-                        fieldAndKeyName.appointmentId: appointmentId,
-                        fieldAndKeyName.uid:
-                            AuthController(context).currentUser!.uid,
-                        fieldAndKeyName.time: dateTime.toIso8601String(),
-                        fieldAndKeyName.problem:
-                            _symptomsEditingController.text,
-                        fieldAndKeyName.status: AppointmentStatus.confirm.name,
-                      }).then((value) {
-                        showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (context) {
-                            return Scaffold(
-                              backgroundColor: Colors.transparent,
-                              body: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    height: 550.h,
-                                    width: 335.w,
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 20.w),
-                                    margin:
-                                        EdgeInsets.symmetric(horizontal: 40.w),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(16.r),
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        SizedBox(height: 30.h),
-                                        Icon(
-                                          Icons.check_circle_outline,
-                                          size: 100.sp,
-                                          color: Colors.blue,
-                                        ),
-                                        SizedBox(height: 12.h),
-                                        Text(
-                                          'Thank You !',
-                                          style: GoogleFonts.rubik(
-                                            fontSize: 38,
-                                            fontWeight: FontWeight.w500,
-                                            color: const Color(0xFF333333),
-                                          ),
-                                          textScaleFactor: 1.sp,
-                                        ),
-                                        SizedBox(height: 30.h),
-                                        SizedBox(
-                                          height: 50.h,
-                                          child: Text(
-                                            'Appointment scheduled at:\n${dateTime.day} ${Utils(context).getMonthName(dateTime.month)} ${dateTime.year}, ${DateFormat('hh:mm a').format(dateTime)}',
-                                            style: GoogleFonts.rubik(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w400,
-                                              color: const Color(0xFF677294),
-                                            ),
-                                            textAlign: TextAlign.center,
-                                            textScaleFactor: 1.sp,
-                                          ),
-                                        ),
-                                        const Spacer(),
-                                        GestureDetector(
-                                          onTap: () {
-                                            loadSlots();
-                                            Navigator.pop(context);
-                                          },
-                                          behavior: HitTestBehavior.translucent,
-                                          child: Container(
-                                            height: 54.h,
-                                            width: 295.w,
-                                            alignment: Alignment.center,
-                                            decoration: BoxDecoration(
-                                              color: const Color(0xFF084B7F),
-                                              borderRadius:
-                                                  BorderRadius.circular(6.r),
-                                            ),
-                                            child: Text(
-                                              'Done',
-                                              style: GoogleFonts.rubik(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w500,
-                                                color: Colors.white,
-                                              ),
-                                              textScaleFactor: 1.sp,
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(height: 10.h),
-                                        GestureDetector(
-                                          onTap: () {
-                                            //
-                                          },
-                                          behavior: HitTestBehavior.translucent,
-                                          child: SizedBox(
-                                            height: 54.h,
-                                            width: 260.w,
-                                            child: Center(
-                                              child: Text(
-                                                'Edit your appointment',
-                                                style: GoogleFonts.rubik(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
-                                                  color:
-                                                      const Color(0xFF677294),
-                                                ),
-                                                textScaleFactor: 1.sp,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        const Spacer(),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        );
-                      });
-                    });
+                  onTap: () {
+                    _bookAppointment();
                   },
                   title: 'Submit',
                 ),
@@ -393,7 +266,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
   loadSlots() async {
     slotTimesList.clear();
     QuerySnapshot appointmentsSnapshot =
-        await _firestore.collection(pathNames.appointments).get();
+        await FireStoreUtils().getAllUsersAppointments();
 
     DateTime startTime =
         DateTime(dateTime.year, dateTime.month, dateTime.day, 10, 0, 0);
@@ -447,5 +320,132 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
     }
 
     setState(() {});
+  }
+
+  _bookAppointment() {
+    FireStoreUtils()
+        .appointmentsByUserAndStatus(
+            AuthController(context).currentUser!.uid, AppointmentStatus.confirm)
+        .then((currentUserAppointments) {
+      bool isAlreadyBooked = false;
+
+      for (var doc in currentUserAppointments.docs) {
+        var date = DateTime.parse(doc.get(fieldAndKeyName.time));
+        if (date.day == dateTime.day &&
+            date.month == dateTime.month &&
+            date.year == dateTime.year) {
+          isAlreadyBooked = true;
+          break;
+        }
+      }
+
+      if (isAlreadyBooked) {
+        Fluttertoast.showToast(msg: messages.appointmentAlreadyBookedForDate);
+      } else {
+        Utils(context).generateId(pathNames.appointments).then((appointmentId) {
+          _firestore
+              .collection(pathNames.appointments)
+              .doc(PathName(context).getAppointmentPath(appointmentId))
+              .set({
+            fieldAndKeyName.appointmentId: appointmentId,
+            fieldAndKeyName.uid: AuthController(context).currentUser!.uid,
+            fieldAndKeyName.time: dateTime.toIso8601String(),
+            fieldAndKeyName.problem: _symptomsEditingController.text,
+            fieldAndKeyName.status: AppointmentStatus.confirm.name,
+          }).then((value) {
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) {
+                return WillPopScope(
+                  onWillPop: () async {
+                    return false;
+                  },
+                  child: Scaffold(
+                    backgroundColor: Colors.transparent,
+                    body: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          height: 550.h,
+                          width: 335.w,
+                          padding: EdgeInsets.symmetric(horizontal: 20.w),
+                          margin: EdgeInsets.symmetric(horizontal: 40.w),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16.r),
+                          ),
+                          child: Column(
+                            children: [
+                              SizedBox(height: 30.h),
+                              Icon(
+                                Icons.check_circle_outline,
+                                size: 100.sp,
+                                color: Colors.blue,
+                              ),
+                              SizedBox(height: 12.h),
+                              Text(
+                                'Thank You !',
+                                style: GoogleFonts.rubik(
+                                  fontSize: 38,
+                                  fontWeight: FontWeight.w500,
+                                  color: const Color(0xFF333333),
+                                ),
+                                textScaleFactor: 1.sp,
+                              ),
+                              SizedBox(height: 30.h),
+                              SizedBox(
+                                height: 50.h,
+                                child: Text(
+                                  'Appointment scheduled at:\n${dateTime.day} ${Utils(context).getMonthName(dateTime.month)} ${dateTime.year}, ${DateFormat('hh:mm a').format(dateTime)}',
+                                  style: GoogleFonts.rubik(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w400,
+                                    color: const Color(0xFF677294),
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  textScaleFactor: 1.sp,
+                                ),
+                              ),
+                              const Spacer(),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.popUntil(
+                                      context, (route) => route.isFirst);
+                                },
+                                behavior: HitTestBehavior.translucent,
+                                child: Container(
+                                  height: 54.h,
+                                  width: 295.w,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF084B7F),
+                                    borderRadius: BorderRadius.circular(6.r),
+                                  ),
+                                  child: Text(
+                                    'Done',
+                                    style: GoogleFonts.rubik(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.white,
+                                    ),
+                                    textScaleFactor: 1.sp,
+                                  ),
+                                ),
+                              ),
+                              const Spacer(),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          });
+        });
+      }
+    });
   }
 }
