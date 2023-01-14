@@ -5,22 +5,24 @@ import 'package:family_dental_clinic/CustomWidgets/CustomProfilePicture.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
 import 'package:family_dental_clinic/infra/Utils.dart';
 import 'package:family_dental_clinic/modules/AppointmentsResponse.dart';
+import 'package:family_dental_clinic/provider/AppointmentsResponseProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class AppointmentsCard extends StatefulWidget {
   final int index;
-  final AppointmentsResponse response;
-  final GestureTapCallback onCancel;
-  final bool isInfoVisible;
+  final AppointmentsResponse? response;
+  final GestureTapCallback refresh;
+  final bool isAdmin;
   const AppointmentsCard({
     super.key,
     this.index = 0,
-    required this.response,
-    required this.onCancel,
-    this.isInfoVisible = false,
+    this.response,
+    required this.refresh,
+    this.isAdmin = false,
   });
 
   @override
@@ -30,6 +32,8 @@ class AppointmentsCard extends StatefulWidget {
 class _AppointmentsCardState extends State<AppointmentsCard> {
   @override
   Widget build(BuildContext context) {
+    Provider.of<AppointmentsResponseProvider>(context, listen: true)
+        .getConfirmResponseList;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 40.w, vertical: 10.h),
       child: Stack(
@@ -45,7 +49,7 @@ class _AppointmentsCardState extends State<AppointmentsCard> {
                 SizedBox(height: 15.h),
                 Center(
                   child: Text(
-                    widget.response.status,
+                    widget.response!.status,
                     style: GoogleFonts.raleway(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
@@ -56,64 +60,47 @@ class _AppointmentsCardState extends State<AppointmentsCard> {
                 ),
                 SizedBox(height: 20.h),
                 profileField('Date: ',
-                    DateFormat('dd-MM-yyyy').format(widget.response.time),
+                    DateFormat('dd-MM-yyyy').format(widget.response!.time),
                     size: 13),
                 SizedBox(height: 5.h),
                 profileField('Time: ',
-                    DateFormat('hh:mm a').format(widget.response.time),
+                    DateFormat('hh:mm a').format(widget.response!.time),
                     size: 13),
                 SizedBox(height: 5.h),
-                profileField('Problem: ', widget.response.problem, size: 13),
+                profileField('Problem: ', widget.response!.problem, size: 13),
                 SizedBox(height: 10.h),
                 Visibility(
                   visible:
-                      widget.response.status == AppointmentStatus.confirm.name,
+                      widget.response!.status == AppointmentStatus.confirm.name,
                   child: InkWell(
                     onTap: () {
-                      Utils(context).confirmationDialog(
-                        onConfirm: () {
-                          FirebaseFirestore.instance
-                              .collection(pathNames.appointments)
-                              .doc(PathName(context).getAppointmentPath(
-                                  widget.response.appointmentId))
-                              .update({
-                            fieldAndKeyName.status:
-                                AppointmentStatus.cancelled.name,
-                          }).then((value) {
-                            widget.onCancel();
-                          });
-                        },
-                        title: messages.cancelAppointmentConfirmation,
-                      );
+                      updateStatus(widget.response!.appointmentId,
+                          AppointmentStatus.cancelled);
                     },
-                    child: Container(
-                      height: 38.h,
-                      decoration: BoxDecoration(
-                        color: const Color(0xffEA0001),
-                        borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(12.r),
-                          bottomRight: Radius.circular(12.r),
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          "Cancel Appointment",
-                          textScaleFactor: 1.sp,
-                          style: GoogleFonts.raleway(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
+                    child: button('Cancel Appointment'),
                   ),
                 ),
               ],
             ),
           ),
           Visibility(
-            visible: widget.isInfoVisible,
+            visible: widget.isAdmin &&
+                widget.response!.status == AppointmentStatus.confirm.name,
+            child: IconButton(
+              iconSize: 30.sp,
+              padding: EdgeInsets.zero,
+              onPressed: () {
+                updateStatus(
+                    widget.response!.appointmentId, AppointmentStatus.visited);
+              },
+              icon: Icon(
+                Icons.done,
+                size: 30.sp,
+              ),
+            ),
+          ),
+          Visibility(
+            visible: widget.isAdmin,
             child: Positioned(
               right: 10.w,
               top: 10.w,
@@ -124,13 +111,13 @@ class _AppointmentsCardState extends State<AppointmentsCard> {
                   await FirebaseFirestore.instance
                       .collection(pathNames.users)
                       .where(fieldAndKeyName.uid,
-                          isEqualTo: widget.response.uid)
+                          isEqualTo: widget.response!.uid)
                       .get()
                       .then((snapshot) {
                     userDoc = snapshot.docs.first;
                   }).then((_) async {
                     currentUserAppointmentsDocs = await FireStoreUtils()
-                        .appointmentsByUser(widget.response.uid)
+                        .appointmentsByUser(widget.response!.uid)
                         .then((snapshot) {
                       return snapshot.docs;
                     });
@@ -155,7 +142,7 @@ class _AppointmentsCardState extends State<AppointmentsCard> {
                                       padding:
                                           EdgeInsets.symmetric(horizontal: 8.w),
                                       child: Text(
-                                        'Appointment Id: ${widget.response.appointmentId}',
+                                        'Appointment Id: ${widget.response!.appointmentId}',
                                         style: GoogleFonts.roboto(fontSize: 14),
                                         textScaleFactor: 1.sp,
                                       ),
@@ -296,6 +283,57 @@ class _AppointmentsCardState extends State<AppointmentsCard> {
         overflow: TextOverflow.fade,
         textScaleFactor: 1.sp,
       ),
+    );
+  }
+
+  Widget button(String title) {
+    return Container(
+      height: 38.h,
+      decoration: BoxDecoration(
+        color: const Color(0xffEA0001),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(12.r),
+          bottomRight: Radius.circular(12.r),
+        ),
+      ),
+      child: Center(
+        child: Text(
+          title,
+          textScaleFactor: 1.sp,
+          style: GoogleFonts.raleway(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  updateStatus(int appointmentId, AppointmentStatus status) {
+    Utils(context).confirmationDialog(
+      onConfirm: () async {
+        String? email;
+        await FirebaseFirestore.instance
+            .collection(pathNames.users)
+            .where(fieldAndKeyName.uid, isEqualTo: widget.response!.uid)
+            .get()
+            .then((snapshot) async {
+          email = snapshot.docs.first.get(fieldAndKeyName.email);
+          print(email);
+          await FirebaseFirestore.instance
+              .collection(pathNames.appointments)
+              .doc(PathName(context)
+                  .getAppointmentPath(widget.response!.appointmentId, email))
+              .update({
+            fieldAndKeyName.status: status.name,
+          }).then((_) {
+            print('object');
+            widget.refresh();
+          });
+        });
+      },
+      title: messages.cancelAppointmentConfirmation,
     );
   }
 }

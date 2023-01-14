@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:family_dental_clinic/Authentication/auth_controller.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomFormButton.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
+import 'package:family_dental_clinic/modules/AppointmentsResponse.dart';
 import 'package:family_dental_clinic/provider/AdminDataProvider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -203,20 +204,117 @@ class FireStoreUtils {
     return snapshot;
   }
 
-  Future<QuerySnapshot> getAllUsersAppointments() async {
-    QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection(pathNames.appointments)
-        .get();
-    return snapshot;
+  Future<QuerySnapshot> getAllUsersAppointments(
+      [AppointmentStatus? status, bool exclude = false]) async {
+    QuerySnapshot? snapshot;
+    if (status == null) {
+      await FirebaseFirestore.instance
+          .collection(pathNames.appointments)
+          .get()
+          .then((ss) {
+        snapshot = ss;
+      });
+    } else {
+      if (exclude) {
+        await FirebaseFirestore.instance
+            .collection(pathNames.appointments)
+            .where(fieldAndKeyName.status, isNotEqualTo: status)
+            .get()
+            .then((ss) {
+          snapshot = ss;
+        });
+      } else {
+        await FirebaseFirestore.instance
+            .collection(pathNames.appointments)
+            .where(fieldAndKeyName.status, isEqualTo: status)
+            .get()
+            .then((ss) {
+          snapshot = ss;
+        });
+      }
+    }
+    return snapshot!;
   }
 
   Future<QuerySnapshot> appointmentsByUserAndStatus(
-      String uid, AppointmentStatus status) async {
-    QuerySnapshot snapshot = await FirebaseFirestore.instance
+      String uid, AppointmentStatus status,
+      [bool exclude = false]) async {
+    QuerySnapshot? snapshot;
+    if (exclude) {
+      await FirebaseFirestore.instance
+          .collection(pathNames.appointments)
+          .where(fieldAndKeyName.uid, isEqualTo: uid)
+          .where(fieldAndKeyName.status, isNotEqualTo: status.name)
+          .get()
+          .then((ss) {
+        snapshot = ss;
+      });
+    } else {
+      await FirebaseFirestore.instance
+          .collection(pathNames.appointments)
+          .where(fieldAndKeyName.uid, isEqualTo: uid)
+          .where(fieldAndKeyName.status, isEqualTo: status.name)
+          .get()
+          .then((ss) {
+        snapshot = ss;
+      });
+    }
+    return snapshot!;
+  }
+
+  Future<List<AppointmentsResponse>> getAppointmentsResponse(
+      BuildContext context, AppointmentStatus status,
+      {bool isAdmin = false, bool exclude = false}) async {
+    List<AppointmentsResponse> appointmentsResponseList = [];
+    appointmentsResponseList.clear();
+    QuerySnapshot? appointmentsSnapshot;
+    if (isAdmin) {
+      appointmentsSnapshot =
+          await FireStoreUtils().getAllUsersAppointments(status, exclude);
+    } else {
+      appointmentsSnapshot = await FireStoreUtils().appointmentsByUserAndStatus(
+          AuthController(context).currentUser!.uid, status, exclude);
+    }
+
+    if (appointmentsSnapshot.docs.isNotEmpty) {
+      for (QueryDocumentSnapshot doc in appointmentsSnapshot.docs) {
+        appointmentsResponseList.add(AppointmentsResponse(
+          appointmentId: doc.get(fieldAndKeyName.appointmentId),
+          time: DateTime.parse(doc.get(fieldAndKeyName.time)),
+          status: doc.get(fieldAndKeyName.status),
+          uid: doc.get(fieldAndKeyName.uid),
+          problem: doc.get(fieldAndKeyName.problem),
+        ));
+      }
+    }
+
+    appointmentsResponseList.sort((a, b) {
+      return a.appointmentId.compareTo(b.appointmentId);
+    });
+
+    return appointmentsResponseList.reversed.toList();
+  }
+
+  updateAppointmentsStatusToExpire() async {
+    List docsList = [];
+    await FirebaseFirestore.instance
         .collection(pathNames.appointments)
-        .where(fieldAndKeyName.uid, isEqualTo: uid)
-        .where(fieldAndKeyName.status, isEqualTo: status.name)
-        .get();
-    return snapshot;
+        .where(fieldAndKeyName.status, isEqualTo: AppointmentStatus.confirm)
+        .get()
+        .then((snapshot) {
+      for (QueryDocumentSnapshot doc in snapshot.docs) {
+        DateTime time = DateTime.parse(doc.get(fieldAndKeyName.time));
+        if (time.isBefore(DateTime.now())) {
+          docsList.add(doc);
+        }
+      }
+    }).then((_) async {
+      for (QueryDocumentSnapshot doc in docsList) {
+        await FirebaseFirestore.instance
+            .collection(pathNames.appointments)
+            .doc(doc.id)
+            .update({fieldAndKeyName.status: AppointmentStatus.expired});
+      }
+    });
   }
 }

@@ -1,4 +1,6 @@
+import 'package:family_dental_clinic/infra/Utils.dart';
 import 'package:family_dental_clinic/provider/AdminDataProvider.dart';
+import 'package:family_dental_clinic/provider/AppointmentsResponseProvider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -11,6 +13,8 @@ void main() async {
   runApp(MultiProvider(
     providers: [
       ListenableProvider<UserDataProvider>(create: (_) => UserDataProvider()),
+      ListenableProvider<AppointmentsResponseProvider>(
+          create: (_) => AppointmentsResponseProvider()),
     ],
     child: const MyApp(),
   ));
@@ -24,6 +28,12 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    FireStoreUtils().updateAppointmentsStatusToExpire();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     // AuthController(context).signout();

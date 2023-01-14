@@ -1,13 +1,18 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:family_dental_clinic/Authentication/auth_controller.dart';
+import 'package:family_dental_clinic/CustomWidgets/AppointmentsCard.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomAppBar.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomAppointmentsButton.dart';
+import 'package:family_dental_clinic/CustomWidgets/CustomLableText.dart';
 import 'package:family_dental_clinic/Screens/Appointments/AppointmentsHistory.dart';
 import 'package:family_dental_clinic/Screens/Appointments/BookAppointment.dart';
 import 'package:family_dental_clinic/Screens/HomePage/ProfilePage.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
+import 'package:family_dental_clinic/infra/Utils.dart';
+import 'package:family_dental_clinic/modules/AppointmentsResponse.dart';
 import 'package:family_dental_clinic/provider/AdminDataProvider.dart';
+import 'package:family_dental_clinic/provider/AppointmentsResponseProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -29,6 +34,8 @@ class _HomePageState extends State<HomePage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   UserData? userData;
 
+  List<AppointmentsResponse> appointmentsResponseList = [];
+
   final CarouselController _carouselController = CarouselController();
   int activeDentalServiceIndex = 0;
 
@@ -47,33 +54,17 @@ class _HomePageState extends State<HomePage> {
         },
       },
       {
-        'title': widget.isAdmin ? 'Appointments' : 'Book Appointment',
+        'title': 'Appointments',
         'icon': Icons.history_outlined,
         'action': () {
           scaffoldKey.currentState!.closeEndDrawer();
           Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (ctx) => widget.isAdmin
-                    ? AppointmentsHistory(isAdmin: widget.isAdmin)
-                    : const BookAppointmentPage()),
+              builder: (ctx) => AppointmentsHistory(isAdmin: widget.isAdmin),
+            ),
           );
         },
-      },
-      {
-        'title': 'Reports',
-        'icon': Icons.picture_as_pdf_outlined,
-        'action': () {},
-      },
-      {
-        'title': 'The Clinic',
-        'icon': Icons.local_hospital_outlined,
-        'action': () {},
-      },
-      {
-        'title': 'FAQ',
-        'icon': Icons.info_outline,
-        'action': () {},
       },
       {
         'title': 'Logout',
@@ -83,53 +74,110 @@ class _HomePageState extends State<HomePage> {
         },
       },
     ];
+
+    _loadAppointments();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     userData = Provider.of<UserDataProvider>(context, listen: true).getUserData;
+    appointmentsResponseList =
+        Provider.of<AppointmentsResponseProvider>(context, listen: true)
+            .getConfirmResponseList;
+
     return Scaffold(
       key: scaffoldKey,
       endDrawer: SafeArea(
-        child: StatefulBuilder(builder: (ctx, setStat) {
-          return Drawer(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.horizontal(
-                left: Radius.circular(20.r),
+        child: Drawer(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.horizontal(
+              left: Radius.circular(20.r),
+            ),
+          ),
+          child: Column(
+            children: [
+              Column(
+                children: drawerItems.map((e) {
+                  return ListTile(
+                    onTap: () {
+                      e['action']();
+                    },
+                    leading: Icon(
+                      e['icon'],
+                      size: 30.sp,
+                      color: Colors.black,
+                    ),
+                    title: Text(
+                      e['title'],
+                      style: GoogleFonts.roboto(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textScaleFactor: 1.sp,
+                    ),
+                    minLeadingWidth: 50.w,
+                  );
+                }).toList(),
               ),
-            ),
-            child: Column(
-              children: [
-                Column(
-                  children: drawerItems.map((e) {
-                    return ListTile(
-                      onTap: () {
-                        e['action']();
-                        setStat(() {});
-                      },
-                      leading: Icon(
-                        e['icon'],
-                        size: 30.sp,
-                        color: Colors.black,
-                      ),
-                      title: Text(
-                        e['title'],
-                        style: GoogleFonts.roboto(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        textScaleFactor: 1.sp,
-                      ),
-                      minLeadingWidth: 50.w,
-                    );
-                  }).toList(),
-                ),
-                SizedBox(height: 50.h),
-              ],
-            ),
-          );
-        }),
+              Builder(builder: (context) {
+                List items = [
+                  {
+                    'title': 'The Clinic',
+                    'icon': Icons.local_hospital_outlined,
+                    'action': () {},
+                  },
+                  {
+                    'title': 'FAQ',
+                    'icon': Icons.info_outline,
+                    'action': () {},
+                  },
+                ];
+                return AboutListTile(
+                  applicationIcon: SizedBox(
+                    height: 100.w,
+                    width: 100.w,
+                    child: Image.asset('assets/logo.png', fit: BoxFit.fill),
+                  ),
+                  aboutBoxChildren: [
+                    Column(
+                      children: items.map((e) {
+                        return ListTile(
+                          onTap: () {
+                            e['action']();
+                          },
+                          leading: Icon(
+                            e['icon'],
+                            size: 30.sp,
+                            color: Colors.black,
+                          ),
+                          title: Text(
+                            e['title'],
+                            style: GoogleFonts.roboto(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            textScaleFactor: 1.sp,
+                          ),
+                          minLeadingWidth: 50.w,
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                  applicationName: 'Family Dental Clinic',
+                  applicationVersion: '1.0.0',
+                  icon: Icon(
+                    Icons.perm_device_info_rounded,
+                    size: 30.sp,
+                  ),
+                  child: Text('About',
+                      style: GoogleFonts.roboto(fontSize: 18),
+                      textScaleFactor: 1.sp),
+                );
+              })
+            ],
+          ),
+        ),
       ),
       body: SafeArea(
         child: SizedBox(
@@ -147,6 +195,38 @@ class _HomePageState extends State<HomePage> {
                   child: Column(
                     children: [
                       SizedBox(height: 10.h),
+                      Visibility(
+                        visible: !widget.isAdmin,
+                        child: Column(
+                          children: [
+                            const CustomLableText(text: 'Confirm Appointment'),
+                            appointmentsResponseList.isEmpty
+                                ? const Center(
+                                    child: Text(
+                                        'There are currently no appointments available'),
+                                  )
+                                : SizedBox(
+                                    height: 200.h,
+                                    child: ListView.builder(
+                                      shrinkWrap: true,
+                                      itemCount:
+                                          appointmentsResponseList.length,
+                                      padding: EdgeInsets.zero,
+                                      itemBuilder: (context, index) {
+                                        return AppointmentsCard(
+                                          isAdmin: widget.isAdmin,
+                                          index: index,
+                                          response:
+                                              appointmentsResponseList[index],
+                                          refresh: _loadAppointments,
+                                        );
+                                      },
+                                    ),
+                                  ),
+                            SizedBox(height: 10.h),
+                          ],
+                        ),
+                      ),
                       Container(
                         width: double.infinity,
                         padding: EdgeInsets.all(20.sp),
@@ -405,9 +485,12 @@ class _HomePageState extends State<HomePage> {
                         child: Center(
                           child: CustomButton(
                             onTap: () {
-                              drawerItems.firstWhere((element) =>
-                                  element['title'].toString().toLowerCase() ==
-                                  'book appointment')['action']();
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (ctx) => BookAppointmentPage(
+                                            onBooked: _loadAppointments,
+                                          )));
                             },
                             title: 'Book Appointment',
                             color: const Color(0xFF005292),
@@ -424,5 +507,12 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+
+  Future _loadAppointments() async {
+    Provider.of<AppointmentsResponseProvider>(context, listen: false)
+        .updateConfirmResponseList(await FireStoreUtils()
+            .getAppointmentsResponse(context, AppointmentStatus.confirm,
+                isAdmin: widget.isAdmin));
   }
 }

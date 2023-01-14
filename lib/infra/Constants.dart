@@ -13,8 +13,8 @@ class PathName {
   final String userProfilePictures = 'userProfilePictures';
   final String appointments = 'appointments';
   final String images = 'images';
-  String getAppointmentPath(int appointmentId) {
-    return '${AuthController(context!).currentUser!.email!}$appointmentId';
+  String getAppointmentPath(int appointmentId, [String? email]) {
+    return '${email ?? AuthController(context!).currentUser!.email!}$appointmentId';
   }
 }
 

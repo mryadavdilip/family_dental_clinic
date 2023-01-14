@@ -1,33 +1,39 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:family_dental_clinic/Authentication/auth_controller.dart';
 import 'package:family_dental_clinic/CustomWidgets/AppointmentsCard.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomIconButton.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomLableText.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
 import 'package:family_dental_clinic/infra/Utils.dart';
 import 'package:family_dental_clinic/modules/AppointmentsResponse.dart';
+import 'package:family_dental_clinic/provider/AppointmentsResponseProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 
 class AppointmentsHistory extends StatefulWidget {
   final bool isAdmin;
-  const AppointmentsHistory({Key? key, this.isAdmin = false}) : super(key: key);
+  const AppointmentsHistory({
+    Key? key,
+    this.isAdmin = false,
+  }) : super(key: key);
 
   @override
   State<AppointmentsHistory> createState() => _AppointmentsHistoryState();
 }
 
 class _AppointmentsHistoryState extends State<AppointmentsHistory> {
-  List<AppointmentsResponse> appointmentsResponseList = [];
+  List<AppointmentsResponse> responseList = [];
 
   @override
   void initState() {
-    _loadAppointments();
+    _loadAppointmentsHistory();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    responseList =
+        Provider.of<AppointmentsResponseProvider>(context, listen: true)
+            .getHistoryResponseList;
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -42,11 +48,11 @@ class _AppointmentsHistoryState extends State<AppointmentsHistory> {
                       Navigator.pop(context);
                     },
                   ),
-                  const CustomLableText(text: 'Appointments'),
+                  const CustomLableText(text: 'Appointments History'),
                 ],
               ),
               SizedBox(height: 30.h),
-              appointmentsResponseList.isEmpty
+              responseList.isEmpty
                   ? const Center(
                       child:
                           Text('There are currently no appointments available'),
@@ -54,14 +60,14 @@ class _AppointmentsHistoryState extends State<AppointmentsHistory> {
                   : ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: appointmentsResponseList.length,
+                      itemCount: responseList.length,
                       padding: EdgeInsets.zero,
                       itemBuilder: (context, index) {
                         return AppointmentsCard(
-                          isInfoVisible: widget.isAdmin,
+                          isAdmin: widget.isAdmin,
                           index: index,
-                          response: appointmentsResponseList[index],
-                          onCancel: _loadAppointments,
+                          response: responseList[index],
+                          refresh: _loadAppointmentsHistory,
                         );
                       },
                     ),
@@ -72,27 +78,14 @@ class _AppointmentsHistoryState extends State<AppointmentsHistory> {
     );
   }
 
-  _loadAppointments() async {
-    appointmentsResponseList.clear();
-    QuerySnapshot? appointmentsSnapshot;
-    if (widget.isAdmin) {
-      appointmentsSnapshot = await FireStoreUtils().getAllUsersAppointments();
-    } else {
-      appointmentsSnapshot = await FireStoreUtils()
-          .appointmentsByUser(AuthController(context).currentUser!.uid);
-    }
-
-    if (appointmentsSnapshot.docs.isNotEmpty) {
-      for (QueryDocumentSnapshot doc in appointmentsSnapshot.docs) {
-        appointmentsResponseList.add(AppointmentsResponse(
-          appointmentId: doc.get(fieldAndKeyName.appointmentId),
-          time: DateTime.parse(doc.get(fieldAndKeyName.time)),
-          status: doc.get(fieldAndKeyName.status),
-          uid: doc.get(fieldAndKeyName.uid),
-          problem: doc.get(fieldAndKeyName.problem),
-        ));
-      }
-      setState(() {});
-    }
+  Future _loadAppointmentsHistory() async {
+    Provider.of<AppointmentsResponseProvider>(context, listen: false)
+        .updateHistoryResponseList(
+            await FireStoreUtils().getAppointmentsResponse(
+      context,
+      AppointmentStatus.confirm,
+      isAdmin: widget.isAdmin,
+      exclude: true,
+    ));
   }
 }

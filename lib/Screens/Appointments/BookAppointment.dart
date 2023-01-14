@@ -6,7 +6,6 @@ import 'package:family_dental_clinic/CustomWidgets/CustomIconButton.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomLableText.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomTextField.dart';
 import 'package:family_dental_clinic/CustomWidgets/DatePickerChip.dart';
-import 'package:family_dental_clinic/Screens/Appointments/AppointmentsHistory.dart';
 import 'package:family_dental_clinic/modules/SlotTimeResponse.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
 import 'package:family_dental_clinic/infra/Utils.dart';
@@ -19,7 +18,9 @@ import 'package:intl/intl.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class BookAppointmentPage extends StatefulWidget {
-  const BookAppointmentPage({Key? key}) : super(key: key);
+  final GestureTapCallback onBooked;
+  const BookAppointmentPage({Key? key, required this.onBooked})
+      : super(key: key);
 
   @override
   State<BookAppointmentPage> createState() => _BookAppointmentPageState();
@@ -233,29 +234,15 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                   maxLines: 10,
                 ),
               ),
-              SizedBox(height: 20.h),
+              SizedBox(height: 40.h),
               Center(
                 child: CustomButton(
                   onTap: () {
                     _bookAppointment();
                   },
-                  title: 'Submit',
+                  title: 'Confirm',
                 ),
               ),
-              SizedBox(height: 30.h),
-              Center(
-                child: CustomButton(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (ctx) => const AppointmentsHistory()));
-                  },
-                  title: 'Appointments',
-                  color: const Color(0xFF005292),
-                ),
-              ),
-              SizedBox(height: 25.h),
             ],
           ),
         ),
@@ -412,6 +399,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                                 onTap: () {
                                   Navigator.popUntil(
                                       context, (route) => route.isFirst);
+                                  widget.onBooked();
                                 },
                                 behavior: HitTestBehavior.translucent,
                                 child: Container(
