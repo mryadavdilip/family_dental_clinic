@@ -320,7 +320,6 @@ class _AppointmentsCardState extends State<AppointmentsCard> {
             .get()
             .then((snapshot) async {
           email = snapshot.docs.first.get(fieldAndKeyName.email);
-          print(email);
           await FirebaseFirestore.instance
               .collection(pathNames.appointments)
               .doc(PathName(context)
@@ -328,7 +327,6 @@ class _AppointmentsCardState extends State<AppointmentsCard> {
               .update({
             fieldAndKeyName.status: status.name,
           }).then((_) {
-            print('object');
             widget.refresh();
           });
         });
