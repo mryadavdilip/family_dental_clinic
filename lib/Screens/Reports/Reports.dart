@@ -2,16 +2,16 @@ import 'package:family_dental_clinic/Authentication/auth_controller.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomLableText.dart';
 import 'package:family_dental_clinic/infra/Utils.dart';
 import 'package:family_dental_clinic/modules/ReportsResponse.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:open_file/open_file.dart';
 
 class Reports extends StatefulWidget {
   final bool isAdmin;
   const Reports({
     super.key,
-    this.isAdmin = false,
+    required this.isAdmin,
   });
 
   @override
@@ -41,19 +41,25 @@ class _ReportsState extends State<Reports> {
                 ? const Center(
                     child: Text('There are currently no reports available'),
                   )
-                : ListBody(
+                : Column(
                     children: reports.map((e) {
-                      return ListTile(
-                        onTap: () {
-                          OpenFile.open(e.file.path);
-                        },
-                        leading: Icon(Icons.picture_as_pdf, size: 30.sp),
-                        title: Text(
-                          e.file.path.split('/').last,
-                          style: GoogleFonts.roboto(
-                            fontSize: 21,
-                          ),
-                          textScaleFactor: 1.sp,
+                      return Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 40.w),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'appointmentId: ${e.appointmentId}',
+                              style: GoogleFonts.roboto(
+                                fontSize: 18,
+                                decoration: TextDecoration.underline,
+                                decorationStyle: TextDecorationStyle.dotted,
+                              ),
+                              textScaleFactor: 1.sp,
+                            ),
+                            SizedBox(height: 2.h),
+                            Image.network(e.url),
+                          ],
                         ),
                       );
                     }).toList(),
@@ -65,7 +71,14 @@ class _ReportsState extends State<Reports> {
   }
 
   loadReports() async {
-    await FireStoreUtils().getReports(
-        widget.isAdmin ? null : AuthController(context).currentUser!.uid);
+    reports = await FireStoreUtils()
+        .getReports(
+            widget.isAdmin ? null : AuthController(context).currentUser!.uid)
+        .catchError((e) {
+      if (kDebugMode) {
+        print(e);
+      }
+    });
+    setState(() {});
   }
 }

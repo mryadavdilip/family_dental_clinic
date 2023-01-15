@@ -6,11 +6,13 @@ import 'package:family_dental_clinic/infra/Constants.dart';
 import 'package:family_dental_clinic/infra/Utils.dart';
 import 'package:family_dental_clinic/modules/AppointmentsResponse.dart';
 import 'package:family_dental_clinic/provider/AppointmentsResponseProvider.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -354,31 +356,35 @@ class _AppointmentsCardState extends State<AppointmentsCard> {
   }
 
   uploadReportFile(int appointmentId, String uid) async {
-    FilePicker.platform
-        .pickFiles(
-            allowMultiple: false, dialogTitle: 'Please pick patient report')
-        .then((result) async {
-      PlatformFile file = result!.files.first;
+    ImagePicker()
+        .pickImage(
+      source: ImageSource.gallery,
+    )
+        .then((image) async {
       await FireStoreUtils().getUserByUid(uid).then((userDoc) async {
         Utils(context).confirmationDialog(
           onConfirm: () async {
             await FirebaseStorage.instance
                 .ref(pathNames.reports)
                 .child(userDoc.get(fieldAndKeyName.email))
-                .child(file.name)
-                .putData(file.bytes!)
-                .then((taskSnapshot) {
-              Utils(context).generateId(pathNames.reports).then(
+                .child(image!.name)
+                .putData(await image.readAsBytes())
+                .then((taskSnapshot) async {
+              await Utils(context).generateId(pathNames.reports).then(
                 (reportId) async {
                   await taskSnapshot.ref.getDownloadURL().then((url) {
                     FirebaseFirestore.instance
-                        .collection(pathNames.appointments)
-                        .doc(PathName(context).getAppointmentPath(reportId))
+                        .collection(pathNames.reports)
+                        .doc(PathName(context).getAppointmentPath(
+                            reportId, userDoc.get(fieldAndKeyName.email)))
                         .set({
                       fieldAndKeyName.appointmentId: appointmentId,
                       fieldAndKeyName.reportId: reportId,
                       fieldAndKeyName.uid: uid,
                       fieldAndKeyName.url: url,
+                    }).then((_) {
+                      Fluttertoast.showToast(
+                          msg: messages.reportUploadedSuccessful);
                     });
                   });
                 },
@@ -388,6 +394,10 @@ class _AppointmentsCardState extends State<AppointmentsCard> {
           title: messages.uploadReportConfirmation,
         );
       });
+    }).catchError((e) {
+      if (kDebugMode) {
+        print(e);
+      }
     });
   }
 }

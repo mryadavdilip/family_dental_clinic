@@ -1,12 +1,10 @@
-import 'dart:io';
-
 class ReportsResponse {
-  final File file;
+  final String url;
   final String uid;
-  final String reportId;
-  final String appointmentId;
+  final int reportId;
+  final int appointmentId;
   ReportsResponse(
-    this.file,
+    this.url,
     this.reportId,
     this.uid,
     this.appointmentId,

@@ -8,7 +8,9 @@ import 'package:family_dental_clinic/CustomWidgets/CustomLableText.dart';
 import 'package:family_dental_clinic/Screens/Appointments/AppointmentsHistory.dart';
 import 'package:family_dental_clinic/Screens/Appointments/BookAppointment.dart';
 import 'package:family_dental_clinic/Screens/HomePage/ProfilePage.dart';
-import 'package:family_dental_clinic/Screens/HomePage/Reports.dart';
+import 'package:family_dental_clinic/Screens/PDFPage.dart';
+import 'package:family_dental_clinic/Screens/Reports/Reports.dart';
+import 'package:family_dental_clinic/Screens/TheClinicPage.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
 import 'package:family_dental_clinic/infra/Utils.dart';
 import 'package:family_dental_clinic/modules/AppointmentsResponse.dart';
@@ -72,7 +74,7 @@ class _HomePageState extends State<HomePage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (ctx) => const Reports(),
+              builder: (ctx) => Reports(isAdmin: widget.isAdmin),
             ),
           );
         },
@@ -137,12 +139,25 @@ class _HomePageState extends State<HomePage> {
                   {
                     'title': 'The Clinic',
                     'icon': Icons.local_hospital_outlined,
-                    'action': () {},
+                    'action': () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (ctx) => const TheClinicPage()));
+                    },
                   },
                   {
                     'title': 'FAQ',
-                    'icon': Icons.info_outline,
-                    'action': () {},
+                    'icon': Icons.question_mark_rounded,
+                    'action': () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (ctx) => const PDFPage(
+                                  path: 'assets/documents/faq.pdf',
+                                )),
+                      );
+                    },
                   },
                 ];
                 return AboutListTile(
@@ -156,8 +171,6 @@ class _HomePageState extends State<HomePage> {
                       children: items.map((e) {
                         return ListTile(
                           onTap: () {
-                            scaffoldKey.currentState!.closeEndDrawer();
-
                             e['action']();
                           },
                           leading: Icon(
@@ -213,7 +226,7 @@ class _HomePageState extends State<HomePage> {
                       SizedBox(height: 10.h),
                       Column(
                         children: [
-                          const CustomLableText(text: 'Confirm Appointment'),
+                          const CustomLableText(text: 'Confirm Appointments'),
                           appointmentsResponseList.isEmpty
                               ? const Center(
                                   child: Text(

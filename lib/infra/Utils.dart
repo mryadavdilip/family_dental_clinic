@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:family_dental_clinic/Authentication/auth_controller.dart';
@@ -8,14 +7,12 @@ import 'package:family_dental_clinic/infra/Constants.dart';
 import 'package:family_dental_clinic/modules/AppointmentsResponse.dart';
 import 'package:family_dental_clinic/modules/ReportsResponse.dart';
 import 'package:family_dental_clinic/provider/AdminDataProvider.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -311,48 +308,36 @@ class FireStoreUtils {
     return userDoc;
   }
 
+  Future<QuerySnapshot> getReportsSnapshot([String? uid]) async {
+    QuerySnapshot snapshot = uid == null
+        ? await FirebaseFirestore.instance.collection(pathNames.reports).get()
+        : await FirebaseFirestore.instance
+            .collection(pathNames.reports)
+            .where(fieldAndKeyName.uid, isEqualTo: uid)
+            .get();
+
+    return snapshot;
+  }
+
   Future<List<ReportsResponse>> getReports([String? uid]) async {
     List<ReportsResponse> reports = [];
-    QuerySnapshot? snapshot;
-    if (uid == null) {
-      await FirebaseFirestore.instance
-          .collection(pathNames.reports)
-          .get()
-          .then((ss) {
-        snapshot = ss;
-      });
-    } else {
-      await FirebaseFirestore.instance
-          .collection(pathNames.reports)
-          .where(fieldAndKeyName.uid, isEqualTo: uid)
-          .get()
-          .then((ss) {
-        snapshot = ss;
-      });
-    }
 
-    if (snapshot == null) {
-      for (QueryDocumentSnapshot doc in snapshot!.docs) {
-        await FirebaseStorage.instance
-            .refFromURL(doc.get(fieldAndKeyName.url))
-            .getData()
-            .then((bytes) async {
-          if (bytes != null) {
-            Directory tempDir = await getTemporaryDirectory();
-            File file = File(tempDir.path);
-            await file.writeAsBytes(bytes);
-            reports.add(ReportsResponse(
-              file,
-              doc.get(fieldAndKeyName.reportId),
-              doc.get(fieldAndKeyName.uid),
-              doc.get(fieldAndKeyName.appointmentId),
-            ));
-          } else {
-            Fluttertoast.showToast(msg: messages.nullReportFile);
-          }
-        });
+    await getReportsSnapshot(uid).then((snapshot) async {
+      for (QueryDocumentSnapshot doc in snapshot.docs) {
+        reports.add(ReportsResponse(
+            doc.get(fieldAndKeyName.url),
+            doc.get(fieldAndKeyName.reportId),
+            doc.get(fieldAndKeyName.uid),
+            doc.get(
+              fieldAndKeyName.appointmentId,
+            )));
       }
-    }
+    }).catchError((e) {
+      if (kDebugMode) {
+        print('error getting reports snapshot');
+      }
+    });
+
     return reports;
   }
 

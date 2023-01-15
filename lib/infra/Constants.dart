@@ -84,6 +84,7 @@ class Messages {
       'Your appointment is already booked for this date, please choose another date';
   String get uploadReportConfirmation => 'Upload this report?';
   String get nullReportFile => 'Null report file found';
+  String get reportUploadedSuccessful => 'Report uploaded successfully';
 }
 
 final Messages messages = Messages();
