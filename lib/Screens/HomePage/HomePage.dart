@@ -226,7 +226,7 @@ class _HomePageState extends State<HomePage> {
                       SizedBox(height: 10.h),
                       Column(
                         children: [
-                          const CustomLableText(text: 'Confirm Appointments'),
+                          const CustomLableText(text: 'Appointment Schedule'),
                           appointmentsResponseList.isEmpty
                               ? const Center(
                                   child: Text(

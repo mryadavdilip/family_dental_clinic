@@ -31,40 +31,46 @@ class _ReportsState extends State<Reports> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          children: [
-            SizedBox(height: 20.h),
-            CustomLableText(
-                text: widget.isAdmin ? 'All reports' : 'Your reports'),
-            SizedBox(height: 30.h),
-            reports.isEmpty
-                ? const Center(
-                    child: Text('There are currently no reports available'),
-                  )
-                : Column(
-                    children: reports.map((e) {
-                      return Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 40.w),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'appointmentId: ${e.appointmentId}',
-                              style: GoogleFonts.roboto(
-                                fontSize: 18,
-                                decoration: TextDecoration.underline,
-                                decorationStyle: TextDecorationStyle.dotted,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              SizedBox(height: 20.h),
+              CustomLableText(
+                  text: widget.isAdmin ? 'All reports' : 'Your reports'),
+              SizedBox(height: 30.h),
+              reports.isEmpty
+                  ? const Center(
+                      child: Text('There are currently no reports available'),
+                    )
+                  : Column(
+                      children: reports.map((e) {
+                        return Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 40.w),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'appointmentId: ${e.appointmentId}',
+                                style: GoogleFonts.roboto(
+                                  fontSize: 18,
+                                  decoration: TextDecoration.underline,
+                                  decorationStyle: TextDecorationStyle.dotted,
+                                ),
+                                textScaleFactor: 1.sp,
                               ),
-                              textScaleFactor: 1.sp,
-                            ),
-                            SizedBox(height: 2.h),
-                            Image.network(e.url),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ),
-          ],
+                              SizedBox(height: 2.h),
+                              Image.network(
+                                e.url,
+                                height: 350.h,
+                                fit: BoxFit.contain,
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+            ],
+          ),
         ),
       ),
     );
