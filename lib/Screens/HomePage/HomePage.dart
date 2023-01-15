@@ -8,6 +8,7 @@ import 'package:family_dental_clinic/CustomWidgets/CustomLableText.dart';
 import 'package:family_dental_clinic/Screens/Appointments/AppointmentsHistory.dart';
 import 'package:family_dental_clinic/Screens/Appointments/BookAppointment.dart';
 import 'package:family_dental_clinic/Screens/HomePage/ProfilePage.dart';
+import 'package:family_dental_clinic/Screens/HomePage/Reports.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
 import 'package:family_dental_clinic/infra/Utils.dart';
 import 'package:family_dental_clinic/modules/AppointmentsResponse.dart';
@@ -46,7 +47,6 @@ class _HomePageState extends State<HomePage> {
         'title': 'Profile',
         'icon': Icons.person_outline,
         'action': () {
-          scaffoldKey.currentState!.closeEndDrawer();
           Navigator.push(
             context,
             MaterialPageRoute(builder: (ctx) => const ProfilePage()),
@@ -57,11 +57,22 @@ class _HomePageState extends State<HomePage> {
         'title': 'Appointments',
         'icon': Icons.history_outlined,
         'action': () {
-          scaffoldKey.currentState!.closeEndDrawer();
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (ctx) => AppointmentsHistory(isAdmin: widget.isAdmin),
+            ),
+          );
+        },
+      },
+      {
+        'title': 'Reports',
+        'icon': Icons.picture_as_pdf_outlined,
+        'action': () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (ctx) => const Reports(),
             ),
           );
         },
@@ -101,6 +112,7 @@ class _HomePageState extends State<HomePage> {
                 children: drawerItems.map((e) {
                   return ListTile(
                     onTap: () {
+                      scaffoldKey.currentState!.closeEndDrawer();
                       e['action']();
                     },
                     leading: Icon(
@@ -144,6 +156,8 @@ class _HomePageState extends State<HomePage> {
                       children: items.map((e) {
                         return ListTile(
                           onTap: () {
+                            scaffoldKey.currentState!.closeEndDrawer();
+
                             e['action']();
                           },
                           leading: Icon(
@@ -170,9 +184,11 @@ class _HomePageState extends State<HomePage> {
                     Icons.perm_device_info_rounded,
                     size: 30.sp,
                   ),
-                  child: Text('About',
-                      style: GoogleFonts.roboto(fontSize: 18),
-                      textScaleFactor: 1.sp),
+                  child: Text(
+                    'About',
+                    style: GoogleFonts.roboto(fontSize: 18),
+                    textScaleFactor: 1.sp,
+                  ),
                 );
               })
             ],
@@ -195,37 +211,33 @@ class _HomePageState extends State<HomePage> {
                   child: Column(
                     children: [
                       SizedBox(height: 10.h),
-                      Visibility(
-                        visible: !widget.isAdmin,
-                        child: Column(
-                          children: [
-                            const CustomLableText(text: 'Confirm Appointment'),
-                            appointmentsResponseList.isEmpty
-                                ? const Center(
-                                    child: Text(
-                                        'There are currently no appointments available'),
-                                  )
-                                : SizedBox(
-                                    height: 200.h,
-                                    child: ListView.builder(
-                                      shrinkWrap: true,
-                                      itemCount:
-                                          appointmentsResponseList.length,
-                                      padding: EdgeInsets.zero,
-                                      itemBuilder: (context, index) {
-                                        return AppointmentsCard(
-                                          isAdmin: widget.isAdmin,
-                                          index: index,
-                                          response:
-                                              appointmentsResponseList[index],
-                                          refresh: _loadAppointments,
-                                        );
-                                      },
-                                    ),
+                      Column(
+                        children: [
+                          const CustomLableText(text: 'Confirm Appointment'),
+                          appointmentsResponseList.isEmpty
+                              ? const Center(
+                                  child: Text(
+                                      'There are currently no appointments available'),
+                                )
+                              : SizedBox(
+                                  height: 200.h,
+                                  child: ListView.builder(
+                                    shrinkWrap: true,
+                                    itemCount: appointmentsResponseList.length,
+                                    padding: EdgeInsets.zero,
+                                    itemBuilder: (context, index) {
+                                      return AppointmentsCard(
+                                        isAdmin: widget.isAdmin,
+                                        index: index,
+                                        response:
+                                            appointmentsResponseList[index],
+                                        refresh: _loadAppointments,
+                                      );
+                                    },
                                   ),
-                            SizedBox(height: 10.h),
-                          ],
-                        ),
+                                ),
+                          SizedBox(height: 10.h),
+                        ],
                       ),
                       Container(
                         width: double.infinity,

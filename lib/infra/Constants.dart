@@ -13,6 +13,8 @@ class PathName {
   final String userProfilePictures = 'userProfilePictures';
   final String appointments = 'appointments';
   final String images = 'images';
+  final String reports = 'reports';
+
   String getAppointmentPath(int appointmentId, [String? email]) {
     return '${email ?? AuthController(context!).currentUser!.email!}$appointmentId';
   }
@@ -40,6 +42,7 @@ class FieldAndKeyName {
   final String time = 'time';
   final String problem = 'problem';
   final String status = 'status';
+  final String reportId = 'reportId';
 }
 
 final FieldAndKeyName fieldAndKeyName = FieldAndKeyName();
@@ -79,6 +82,8 @@ class Messages {
   String get accountDeleteSuccessful => 'Your account deleted successfully';
   String get appointmentAlreadyBookedForDate =>
       'Your appointment is already booked for this date, please choose another date';
+  String get uploadReportConfirmation => 'Upload this report?';
+  String get nullReportFile => 'Null report file found';
 }
 
 final Messages messages = Messages();

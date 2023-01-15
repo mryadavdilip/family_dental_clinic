@@ -6,6 +6,8 @@ import 'package:family_dental_clinic/infra/Constants.dart';
 import 'package:family_dental_clinic/infra/Utils.dart';
 import 'package:family_dental_clinic/modules/AppointmentsResponse.dart';
 import 'package:family_dental_clinic/provider/AppointmentsResponseProvider.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -86,17 +88,35 @@ class _AppointmentsCardState extends State<AppointmentsCard> {
           Visibility(
             visible: widget.isAdmin &&
                 widget.response!.status == AppointmentStatus.confirm.name,
-            child: IconButton(
-              iconSize: 30.sp,
-              padding: EdgeInsets.zero,
-              onPressed: () {
-                updateStatus(
-                    widget.response!.appointmentId, AppointmentStatus.visited);
-              },
-              icon: Icon(
-                Icons.done,
-                size: 30.sp,
-              ),
+            child: Row(
+              children: [
+                IconButton(
+                  iconSize: 30.sp,
+                  padding: EdgeInsets.zero,
+                  onPressed: () {
+                    updateStatus(widget.response!.appointmentId,
+                        AppointmentStatus.visited);
+                  },
+                  icon: Icon(
+                    Icons.done,
+                    size: 30.sp,
+                  ),
+                ),
+                IconButton(
+                  iconSize: 30.sp,
+                  padding: EdgeInsets.zero,
+                  onPressed: () {
+                    uploadReportFile(
+                      widget.response!.appointmentId,
+                      widget.response!.uid,
+                    );
+                  },
+                  icon: Icon(
+                    Icons.upload_file_outlined,
+                    size: 30.sp,
+                  ),
+                ),
+              ],
             ),
           ),
           Visibility(
@@ -313,17 +333,15 @@ class _AppointmentsCardState extends State<AppointmentsCard> {
   updateStatus(int appointmentId, AppointmentStatus status) {
     Utils(context).confirmationDialog(
       onConfirm: () async {
-        String? email;
-        await FirebaseFirestore.instance
-            .collection(pathNames.users)
-            .where(fieldAndKeyName.uid, isEqualTo: widget.response!.uid)
-            .get()
-            .then((snapshot) async {
-          email = snapshot.docs.first.get(fieldAndKeyName.email);
+        FireStoreUtils()
+            .getUserByUid(widget.response!.uid)
+            .then((userDoc) async {
           await FirebaseFirestore.instance
               .collection(pathNames.appointments)
-              .doc(PathName(context)
-                  .getAppointmentPath(widget.response!.appointmentId, email))
+              .doc(PathName(context).getAppointmentPath(
+                widget.response!.appointmentId,
+                userDoc.get(fieldAndKeyName.email),
+              ))
               .update({
             fieldAndKeyName.status: status.name,
           }).then((_) {
@@ -333,5 +351,43 @@ class _AppointmentsCardState extends State<AppointmentsCard> {
       },
       title: messages.cancelAppointmentConfirmation,
     );
+  }
+
+  uploadReportFile(int appointmentId, String uid) async {
+    FilePicker.platform
+        .pickFiles(
+            allowMultiple: false, dialogTitle: 'Please pick patient report')
+        .then((result) async {
+      PlatformFile file = result!.files.first;
+      await FireStoreUtils().getUserByUid(uid).then((userDoc) async {
+        Utils(context).confirmationDialog(
+          onConfirm: () async {
+            await FirebaseStorage.instance
+                .ref(pathNames.reports)
+                .child(userDoc.get(fieldAndKeyName.email))
+                .child(file.name)
+                .putData(file.bytes!)
+                .then((taskSnapshot) {
+              Utils(context).generateId(pathNames.reports).then(
+                (reportId) async {
+                  await taskSnapshot.ref.getDownloadURL().then((url) {
+                    FirebaseFirestore.instance
+                        .collection(pathNames.appointments)
+                        .doc(PathName(context).getAppointmentPath(reportId))
+                        .set({
+                      fieldAndKeyName.appointmentId: appointmentId,
+                      fieldAndKeyName.reportId: reportId,
+                      fieldAndKeyName.uid: uid,
+                      fieldAndKeyName.url: url,
+                    });
+                  });
+                },
+              );
+            });
+          },
+          title: messages.uploadReportConfirmation,
+        );
+      });
+    });
   }
 }

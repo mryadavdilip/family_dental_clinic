@@ -1,17 +1,21 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:family_dental_clinic/Authentication/auth_controller.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomFormButton.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
 import 'package:family_dental_clinic/modules/AppointmentsResponse.dart';
+import 'package:family_dental_clinic/modules/ReportsResponse.dart';
 import 'package:family_dental_clinic/provider/AdminDataProvider.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -218,7 +222,7 @@ class FireStoreUtils {
       if (exclude) {
         await FirebaseFirestore.instance
             .collection(pathNames.appointments)
-            .where(fieldAndKeyName.status, isNotEqualTo: status)
+            .where(fieldAndKeyName.status, isNotEqualTo: status.name)
             .get()
             .then((ss) {
           snapshot = ss;
@@ -226,7 +230,7 @@ class FireStoreUtils {
       } else {
         await FirebaseFirestore.instance
             .collection(pathNames.appointments)
-            .where(fieldAndKeyName.status, isEqualTo: status)
+            .where(fieldAndKeyName.status, isEqualTo: status.name)
             .get()
             .then((ss) {
           snapshot = ss;
@@ -295,11 +299,69 @@ class FireStoreUtils {
     return appointmentsResponseList.reversed.toList();
   }
 
+  Future<QueryDocumentSnapshot> getUserByUid(String uid) async {
+    QueryDocumentSnapshot userDoc = await FirebaseFirestore.instance
+        .collection(pathNames.users)
+        .where(fieldAndKeyName.uid, isEqualTo: uid)
+        .get()
+        .then((snapshot) {
+      return snapshot.docs.first;
+    });
+
+    return userDoc;
+  }
+
+  Future<List<ReportsResponse>> getReports([String? uid]) async {
+    List<ReportsResponse> reports = [];
+    QuerySnapshot? snapshot;
+    if (uid == null) {
+      await FirebaseFirestore.instance
+          .collection(pathNames.reports)
+          .get()
+          .then((ss) {
+        snapshot = ss;
+      });
+    } else {
+      await FirebaseFirestore.instance
+          .collection(pathNames.reports)
+          .where(fieldAndKeyName.uid, isEqualTo: uid)
+          .get()
+          .then((ss) {
+        snapshot = ss;
+      });
+    }
+
+    if (snapshot == null) {
+      for (QueryDocumentSnapshot doc in snapshot!.docs) {
+        await FirebaseStorage.instance
+            .refFromURL(doc.get(fieldAndKeyName.url))
+            .getData()
+            .then((bytes) async {
+          if (bytes != null) {
+            Directory tempDir = await getTemporaryDirectory();
+            File file = File(tempDir.path);
+            await file.writeAsBytes(bytes);
+            reports.add(ReportsResponse(
+              file,
+              doc.get(fieldAndKeyName.reportId),
+              doc.get(fieldAndKeyName.uid),
+              doc.get(fieldAndKeyName.appointmentId),
+            ));
+          } else {
+            Fluttertoast.showToast(msg: messages.nullReportFile);
+          }
+        });
+      }
+    }
+    return reports;
+  }
+
   updateAppointmentsStatusToExpire() async {
     List docsList = [];
     await FirebaseFirestore.instance
         .collection(pathNames.appointments)
-        .where(fieldAndKeyName.status, isEqualTo: AppointmentStatus.confirm)
+        .where(fieldAndKeyName.status,
+            isEqualTo: AppointmentStatus.confirm.name)
         .get()
         .then((snapshot) {
       for (QueryDocumentSnapshot doc in snapshot.docs) {
@@ -313,7 +375,7 @@ class FireStoreUtils {
         await FirebaseFirestore.instance
             .collection(pathNames.appointments)
             .doc(doc.id)
-            .update({fieldAndKeyName.status: AppointmentStatus.expired});
+            .update({fieldAndKeyName.status: AppointmentStatus.expired.name});
       }
     });
   }
