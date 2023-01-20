@@ -2,6 +2,7 @@ import 'package:family_dental_clinic/Screens/PDFPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 class TheClinicPage extends StatelessWidget {
   const TheClinicPage({super.key});
@@ -18,8 +19,9 @@ class TheClinicPage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (ctx) => const PDFPage(
-                            path: 'assets/documents/clinic/about us.pdf',
+                      builder: (ctx) => PDFPage(
+                            sfPdfViewer: SfPdfViewer.asset(
+                                'assets/documents/clinic/about us.pdf'),
                           )),
                 );
               },
@@ -34,9 +36,9 @@ class TheClinicPage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (ctx) => const PDFPage(
-                            path:
-                                'assets/documents/clinic/practice location.pdf',
+                      builder: (ctx) => PDFPage(
+                            sfPdfViewer: SfPdfViewer.asset(
+                                'assets/documents/clinic/practice location.pdf'),
                           )),
                 );
               },
@@ -51,8 +53,9 @@ class TheClinicPage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (ctx) => const PDFPage(
-                            path: 'assets/documents/clinic/sterilisation.pdf',
+                      builder: (ctx) => PDFPage(
+                            sfPdfViewer: SfPdfViewer.asset(
+                                'assets/documents/clinic/sterilisation.pdf'),
                           )),
                 );
               },

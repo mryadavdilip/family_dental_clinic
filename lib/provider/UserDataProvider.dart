@@ -15,7 +15,6 @@ class UserDataProvider extends ChangeNotifier {
         address: '',
         profilePicture: '',
         phone: '',
-        description: '',
         userRole: UserRole.patient,
       );
 

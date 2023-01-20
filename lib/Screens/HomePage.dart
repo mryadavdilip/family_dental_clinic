@@ -5,21 +5,23 @@ import 'package:family_dental_clinic/CustomWidgets/AppointmentsCard.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomAppBar.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomAppointmentsButton.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomLableText.dart';
-import 'package:family_dental_clinic/Screens/Appointments/AppointmentsHistory.dart';
-import 'package:family_dental_clinic/Screens/Appointments/BookAppointment.dart';
-import 'package:family_dental_clinic/Screens/HomePage/ProfilePage.dart';
+import 'package:family_dental_clinic/Screens/AppointmentsHistory.dart';
+import 'package:family_dental_clinic/Screens/BookAppointment.dart';
+import 'package:family_dental_clinic/Screens/EditServices.dart';
+import 'package:family_dental_clinic/Screens/ProfilePage.dart';
 import 'package:family_dental_clinic/Screens/PDFPage.dart';
-import 'package:family_dental_clinic/Screens/Reports/Reports.dart';
+import 'package:family_dental_clinic/Screens/Reports.dart';
 import 'package:family_dental_clinic/Screens/TheClinicPage.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
 import 'package:family_dental_clinic/infra/Utils.dart';
 import 'package:family_dental_clinic/modules/AppointmentsResponse.dart';
-import 'package:family_dental_clinic/provider/AdminDataProvider.dart';
+import 'package:family_dental_clinic/provider/UserDataProvider.dart';
 import 'package:family_dental_clinic/provider/AppointmentsResponseProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 class HomePage extends StatefulWidget {
   final bool isAdmin;
@@ -153,8 +155,9 @@ class _HomePageState extends State<HomePage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (ctx) => const PDFPage(
-                                  path: 'assets/documents/faq.pdf',
+                            builder: (ctx) => PDFPage(
+                                  sfPdfViewer: SfPdfViewer.asset(
+                                      'assets/documents/faq.pdf'),
                                 )),
                       );
                     },
@@ -275,7 +278,8 @@ class _HomePageState extends State<HomePage> {
                             ConstrainedBox(
                               constraints: BoxConstraints(maxWidth: 150.w),
                               child: Text(
-                                'Experience advanced dentristry at Family Dental Clinic',
+                                // 'Family dental clinic delivers quality dentistry with a personalized touch. Each patient is treated with the utmost care, compassion, empathy and state-of-the-art dentistry that promises nothing but the best. Family Dental provide oral care solutions for dental problems, including Root Canal Treatment, teeth whitening, teeth cleansing and polishing, complete or partial dentures, orthodontic treatment and take care of all your dental needs and ensure complete sterilization in all our procedures.',
+                                'Experience Adnvanced Dentistry at Family Dental Clinic',
                                 style: GoogleFonts.raleway(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
@@ -518,6 +522,21 @@ class _HomePageState extends State<HomePage> {
                                           )));
                             },
                             title: 'Book Appointment',
+                            color: const Color(0xFF005292),
+                          ),
+                        ),
+                      ),
+                      Visibility(
+                        visible: widget.isAdmin,
+                        child: Center(
+                          child: CustomButton(
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (ctx) => const EditServices()));
+                            },
+                            title: 'Edit Services',
                             color: const Color(0xFF005292),
                           ),
                         ),

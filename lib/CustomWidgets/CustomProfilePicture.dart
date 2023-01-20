@@ -3,13 +3,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class CustomProfilePicture extends StatelessWidget {
   final String url;
-  const CustomProfilePicture({super.key, this.url = ''});
+  final double size;
+  const CustomProfilePicture({super.key, this.url = '', this.size = 100});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 100.w,
-      width: 100.w,
+      height: size.w,
+      width: size.w,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(

@@ -9,7 +9,7 @@ class PathName {
   final String signupForm = 'signup_form';
   final String clinicDetails = 'clinic_details';
   final String users = 'users';
-  final String services = 'Services';
+  final String services = 'services';
   final String userProfilePictures = 'userProfilePictures';
   final String appointments = 'appointments';
   final String images = 'images';
@@ -24,6 +24,7 @@ final PathName pathNames = PathName();
 
 class FieldAndKeyName {
   final String appointmentId = 'appointmentId';
+  final String serviceId = 'serviceId';
   final String uid = 'uid';
   final String gendersList = 'gendersList';
   final String address = 'address';
@@ -43,6 +44,7 @@ class FieldAndKeyName {
   final String problem = 'problem';
   final String status = 'status';
   final String reportId = 'reportId';
+  final String holidays = 'holidays';
 }
 
 final FieldAndKeyName fieldAndKeyName = FieldAndKeyName();
@@ -85,6 +87,14 @@ class Messages {
   String get uploadReportConfirmation => 'Upload this report?';
   String get nullReportFile => 'Null report file found';
   String get reportUploadedSuccessful => 'Report uploaded successfully';
+  String get markVisitConfirmation => 'Are you sure, you want to mark visited?';
+  String get deleteServiceConfirmation =>
+      'Are you sure, you want to delete the service?';
+  String get serviceDeletedSuccessfully => 'Service deleted successfully';
+  String get serviceAddedSuccessfully => 'Service added successfully';
+  String get imageUpdateConfirmation =>
+      'Are you sure, you want to update image?';
+  String get serviceDetailsUpdated => 'Service details updated successfully';
 }
 
 final Messages messages = Messages();
@@ -98,7 +108,6 @@ class UserData {
   final String uid;
   final String name;
   final String address;
-  final String description;
   final String email;
   final String profilePicture;
   final String phone;
@@ -109,7 +118,6 @@ class UserData {
     required this.uid,
     required this.name,
     required this.address,
-    required this.description,
     required this.email,
     required this.profilePicture,
     required this.phone,

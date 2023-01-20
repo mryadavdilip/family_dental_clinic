@@ -5,8 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:family_dental_clinic/Authentication/auth_controller.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomFormButton.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomFormTextField.dart';
-import 'package:family_dental_clinic/Screens/ResetPassword.dart';
-import 'package:family_dental_clinic/Screens/Signup.dart';
+import 'package:family_dental_clinic/Screens/Authentication/ResetPassword.dart';
+import 'package:family_dental_clinic/Screens/Authentication/Signup.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);

@@ -3,7 +3,7 @@ import 'package:family_dental_clinic/CustomWidgets/CustomFormHeader.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomProfilePicture.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
 import 'package:family_dental_clinic/infra/Utils.dart';
-import 'package:family_dental_clinic/provider/AdminDataProvider.dart';
+import 'package:family_dental_clinic/provider/UserDataProvider.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

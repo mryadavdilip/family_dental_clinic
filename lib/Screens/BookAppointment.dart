@@ -86,7 +86,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                       context: context,
                       keyboardType: TextInputType.text,
                       initialDate: dateTime,
-                      firstDate: DateTime(1901),
+                      firstDate: DateTime(DateTime.now().year),
                       lastDate:
                           DateTime(DateTime.now().year + 2, 0, 0, 0, 0, 0, 0),
                     ).then(
@@ -125,37 +125,58 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                 child: ScrollablePositionedList.builder(
                   shrinkWrap: true,
                   itemCount: Utils(context)
-                          .getDaysInMonth(dateTime.month, dateTime.year) ??
-                      0,
+                      .getDaysInMonth(dateTime.month, dateTime.year),
                   scrollDirection: Axis.horizontal,
                   itemScrollController: dayScrollController,
                   padding: EdgeInsets.only(left: 20.w),
                   itemBuilder: (context, index) {
+                    int date = index + 1;
                     return Padding(
                       padding: EdgeInsets.only(right: 10.w),
-                      child: DatePickerChip(
-                        onTap: () {
-                          selectedDate = index + 1;
-                          dateTime = DateTime(
-                              dateTime.year, dateTime.month, selectedDate!);
-                          setState(() {});
-                          loadSlots();
+                      child: FutureBuilder<List>(
+                        future: FireStoreUtils().getHolidaysList(),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          } else {
+                            List holidays = snapshot.data!;
+                            bool isHoliday = false;
+                            for (var holiday in holidays) {
+                              if (DateTime.parse(holiday).isAtSameMomentAs(
+                                  DateTime(
+                                      dateTime.year, dateTime.month, date))) {
+                                isHoliday = true;
+                              }
+                            }
+                            return DatePickerChip(
+                              onTap: () {
+                                selectedDate = date;
+                                dateTime = DateTime(dateTime.year,
+                                    dateTime.month, selectedDate!);
+                                setState(() {});
+                                loadSlots();
+                              },
+                              date:
+                                  '$date${Utils(context).getOrdinal(number: date)}',
+                              day: DateFormat('EEEE')
+                                  .format(DateTime(
+                                      dateTime.year, dateTime.month, date))
+                                  .toString(),
+                              state:
+                                  DateTime(dateTime.year, dateTime.month, date)
+                                              .isBefore(DateTime(
+                                                  DateTime.now().year,
+                                                  DateTime.now().month,
+                                                  DateTime.now().day)) ||
+                                          isHoliday
+                                      ? DatePickerChipState.disabled
+                                      : selectedDate == date
+                                          ? DatePickerChipState.selected
+                                          : DatePickerChipState.active,
+                            );
+                          }
                         },
-                        date:
-                            '${index + 1}${Utils(context).getOrdinal(number: index + 1)}',
-                        day: DateFormat('EEEE')
-                            .format(DateTime(
-                                dateTime.year, dateTime.month, index + 1))
-                            .toString(),
-                        state:
-                            DateTime(dateTime.year, dateTime.month, index + 1)
-                                        .difference(DateTime.now())
-                                        .inDays <
-                                    0
-                                ? DatePickerChipState.disabled
-                                : selectedDate == index + 1
-                                    ? DatePickerChipState.selected
-                                    : DatePickerChipState.active,
                       ),
                     );
                   },
@@ -252,6 +273,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
 
   loadSlots() async {
     slotTimesList.clear();
+
     QuerySnapshot appointmentsSnapshot =
         await FireStoreUtils().getAllUsersAppointments();
 
@@ -279,7 +301,8 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
       }
 
       if (!(timeIncrement.isAfter(breakStartTime) &&
-          timeIncrement.isBefore(breakEndTime))) {
+              timeIncrement.isBefore(breakEndTime)) &&
+          timeIncrement.isAfter(DateTime.now())) {
         if (!isBooked) {
           slotTimesList.add(SlotTime(
             startTime: timeIncrement,

@@ -3,8 +3,8 @@ import 'package:family_dental_clinic/infra/Constants.dart';
 import 'package:family_dental_clinic/infra/Utils.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:family_dental_clinic/Screens/Login.dart';
-import 'package:family_dental_clinic/Screens/HomePage/HomePage.dart';
+import 'package:family_dental_clinic/Screens/Authentication/Login.dart';
+import 'package:family_dental_clinic/Screens/HomePage.dart';
 
 class Navigation extends StatefulWidget {
   const Navigation({Key? key}) : super(key: key);

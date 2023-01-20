@@ -1,5 +1,5 @@
 import 'package:family_dental_clinic/infra/Utils.dart';
-import 'package:family_dental_clinic/provider/AdminDataProvider.dart';
+import 'package:family_dental_clinic/provider/UserDataProvider.dart';
 import 'package:family_dental_clinic/provider/AppointmentsResponseProvider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';

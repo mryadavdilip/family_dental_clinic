@@ -6,7 +6,7 @@ import 'package:family_dental_clinic/CustomWidgets/CustomFormButton.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
 import 'package:family_dental_clinic/modules/AppointmentsResponse.dart';
 import 'package:family_dental_clinic/modules/ReportsResponse.dart';
-import 'package:family_dental_clinic/provider/AdminDataProvider.dart';
+import 'package:family_dental_clinic/provider/UserDataProvider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -36,7 +36,6 @@ class Utils {
         address: doc.get(fieldAndKeyName.address),
         profilePicture: doc.get(fieldAndKeyName.profilePicture),
         phone: doc.get(fieldAndKeyName.phone),
-        description: doc.get(fieldAndKeyName.description),
         userRole: doc.get(fieldAndKeyName.userRole) == UserRole.admin.name
             ? UserRole.admin
             : UserRole.patient,
@@ -177,7 +176,7 @@ class Utils {
     return monthName[month];
   }
 
-  int? getDaysInMonth(int month, int year) {
+  int getDaysInMonth(int month, int year) {
     Map<int, int> daysInMonth = {
       1: 31,
       2: year % 4 == 0 ? 29 : 28,
@@ -192,7 +191,7 @@ class Utils {
       11: 30,
       12: 31,
     };
-    return daysInMonth[month];
+    return daysInMonth[month]!;
   }
 }
 
@@ -339,6 +338,32 @@ class FireStoreUtils {
     });
 
     return reports;
+  }
+
+  List<String> ddMMyyyyListToIso8601StringList(List<String> list) {
+    List<String> iso8601StringList = [];
+    for (String d in list) {
+      iso8601StringList.add(DateTime(int.parse(d.split('-').last),
+              int.parse(d.split('-')[1]), int.parse(d.split('-').first))
+          .toIso8601String());
+    }
+    return iso8601StringList;
+  }
+
+  Future<List> getHolidaysList() async {
+    List holidays = await FirebaseFirestore.instance
+        .collection(pathNames.staticData)
+        .doc(pathNames.appointments)
+        .get()
+        .then((doc) {
+      if (doc.exists) {
+        return doc.get(fieldAndKeyName.holidays);
+      } else {
+        return [];
+      }
+    });
+
+    return holidays;
   }
 
   updateAppointmentsStatusToExpire() async {
