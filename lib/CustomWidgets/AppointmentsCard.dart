@@ -1,7 +1,4 @@
-import 'package:age_calculator/age_calculator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:family_dental_clinic/CustomWidgets/CustomLableText.dart';
-import 'package:family_dental_clinic/CustomWidgets/CustomProfilePicture.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
 import 'package:family_dental_clinic/infra/Utils.dart';
 import 'package:family_dental_clinic/modules/AppointmentsResponse.dart';
