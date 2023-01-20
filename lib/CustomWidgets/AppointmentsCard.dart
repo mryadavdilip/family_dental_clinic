@@ -129,7 +129,6 @@ class _AppointmentsCardState extends State<AppointmentsCard> {
               child: GestureDetector(
                 onTap: () async {
                   QueryDocumentSnapshot? userDoc;
-                  List<QueryDocumentSnapshot> currentUserAppointmentsDocs = [];
                   await FirebaseFirestore.instance
                       .collection(pathNames.users)
                       .where(fieldAndKeyName.uid,
@@ -137,135 +136,11 @@ class _AppointmentsCardState extends State<AppointmentsCard> {
                       .get()
                       .then((snapshot) {
                     userDoc = snapshot.docs.first;
-                  }).then((_) async {
-                    currentUserAppointmentsDocs = await FireStoreUtils()
-                        .appointmentsByUser(widget.response!.uid)
-                        .then((snapshot) {
-                      return snapshot.docs;
-                    });
+                  }).then((value) {
+                    Utils(context).showUserInfo(
+                        appointmentId: '${widget.response!.appointmentId}',
+                        userDoc: userDoc!);
                   });
-
-                  showDialog(
-                    context: context,
-                    builder: (ctx) {
-                      return Padding(
-                        padding: EdgeInsets.all(20.sp),
-                        child: Stack(
-                          children: [
-                            Material(
-                              borderRadius: BorderRadius.circular(10.r),
-                              color: Colors.blue.shade100,
-                              child: Column(
-                                children: [
-                                  SizedBox(height: 10.h),
-                                  Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Padding(
-                                      padding:
-                                          EdgeInsets.symmetric(horizontal: 8.w),
-                                      child: Text(
-                                        'Appointment Id: ${widget.response!.appointmentId}',
-                                        style: GoogleFonts.roboto(fontSize: 14),
-                                        textScaleFactor: 1.sp,
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(height: 10.h),
-                                  CustomProfilePicture(
-                                      url: userDoc!
-                                          .get(fieldAndKeyName.profilePicture)),
-                                  SizedBox(height: 20.h),
-                                  const CustomLableText(text: 'Personal info'),
-                                  SizedBox(height: 20.h),
-                                  profileField(
-                                    "Name: ",
-                                    userDoc!
-                                        .get(fieldAndKeyName.name)
-                                        .toString()
-                                        .toUpperCase(),
-                                  ),
-                                  SizedBox(height: 20.h),
-                                  profileField(
-                                    "Age: ",
-                                    AgeCalculator.age(DateTime.parse(userDoc!
-                                            .get(fieldAndKeyName.dateOfBirth)))
-                                        .years
-                                        .toString(),
-                                  ),
-                                  SizedBox(height: 20.h),
-                                  profileField(
-                                    "Gender: ",
-                                    userDoc!.get(fieldAndKeyName.gender),
-                                  ),
-                                  SizedBox(height: 20.h),
-                                  profileField(
-                                    "phone: ",
-                                    userDoc!.get(fieldAndKeyName.phone),
-                                  ),
-                                  SizedBox(height: 20.h),
-                                  profileField(
-                                    "Email: ",
-                                    userDoc!
-                                        .get(fieldAndKeyName.email)
-                                        .toString()
-                                        .toUpperCase(),
-                                  ),
-                                  SizedBox(height: 20.h),
-                                  profileField(
-                                    "Address: ",
-                                    userDoc!.get(fieldAndKeyName.address),
-                                  ),
-                                  SizedBox(height: 10.h),
-                                  const Divider(color: Colors.red),
-                                  SizedBox(height: 10.h),
-                                  const CustomLableText(
-                                      text: 'Additional info'),
-                                  SizedBox(height: 20.h),
-                                  profileField(
-                                    "Last login: ",
-                                    userDoc!.get(fieldAndKeyName.lastLogin),
-                                  ),
-                                  SizedBox(height: 20.h),
-                                  profileField(
-                                    "User role: ",
-                                    userDoc!
-                                        .get(fieldAndKeyName.userRole)
-                                        .toString()
-                                        .toUpperCase(),
-                                  ),
-                                  SizedBox(height: 20.h),
-                                  profileField(
-                                    "Unique id: ",
-                                    userDoc!.get(fieldAndKeyName.uid),
-                                  ),
-                                  SizedBox(height: 20.h),
-                                  profileField(
-                                    "Total appointments: ",
-                                    currentUserAppointmentsDocs.length
-                                        .toString(),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Positioned(
-                              top: 10.w,
-                              right: 10.w,
-                              child: GestureDetector(
-                                onTap: () {
-                                  Navigator.pop(context);
-                                },
-                                child: Icon(
-                                  Icons.close,
-                                  size: 30.sp,
-                                  color: Colors.red,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  );
                 },
                 behavior: HitTestBehavior.translucent,
                 child: Icon(

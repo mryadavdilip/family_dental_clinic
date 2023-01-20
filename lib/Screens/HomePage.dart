@@ -12,6 +12,7 @@ import 'package:family_dental_clinic/Screens/ProfilePage.dart';
 import 'package:family_dental_clinic/Screens/PDFPage.dart';
 import 'package:family_dental_clinic/Screens/Reports.dart';
 import 'package:family_dental_clinic/Screens/TheClinicPage.dart';
+import 'package:family_dental_clinic/Screens/UsersList.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
 import 'package:family_dental_clinic/infra/Utils.dart';
 import 'package:family_dental_clinic/modules/AppointmentsResponse.dart';
@@ -81,6 +82,19 @@ class _HomePageState extends State<HomePage> {
           );
         },
       },
+      if (widget.isAdmin)
+        {
+          'title': 'Users',
+          'icon': Icons.people,
+          'action': () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (ctx) => UsersList(isAdmin: widget.isAdmin),
+              ),
+            );
+          },
+        },
       {
         'title': 'Logout',
         'icon': Icons.logout_outlined,

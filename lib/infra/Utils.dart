@@ -1,8 +1,11 @@
 import 'dart:developer';
 
+import 'package:age_calculator/age_calculator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:family_dental_clinic/Authentication/auth_controller.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomFormButton.dart';
+import 'package:family_dental_clinic/CustomWidgets/CustomLableText.dart';
+import 'package:family_dental_clinic/CustomWidgets/CustomProfilePicture.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
 import 'package:family_dental_clinic/modules/AppointmentsResponse.dart';
 import 'package:family_dental_clinic/modules/ReportsResponse.dart';
@@ -13,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -192,6 +196,171 @@ class Utils {
       12: 31,
     };
     return daysInMonth[month]!;
+  }
+
+  showUserInfo({
+    String? appointmentId,
+    required QueryDocumentSnapshot userDoc,
+  }) {
+    Widget profileField(String lable, String value, {double size = 18}) {
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: 50.w),
+        child: RichText(
+          text: TextSpan(
+            text: lable,
+            style: GoogleFonts.raleway(
+              fontSize: size,
+              fontWeight: FontWeight.w700,
+              color: Colors.black,
+            ),
+            children: [
+              TextSpan(
+                text: value,
+                style: GoogleFonts.raleway(
+                  fontSize: size,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black,
+                ),
+              ),
+            ],
+          ),
+          overflow: TextOverflow.fade,
+          textScaleFactor: 1.sp,
+        ),
+      );
+    }
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return Padding(
+          padding: EdgeInsets.all(20.sp),
+          child: Stack(
+            children: [
+              FutureBuilder<QuerySnapshot>(
+                  future: FireStoreUtils()
+                      .appointmentsByUser(userDoc.get(fieldAndKeyName.uid)),
+                  builder: (context, snapshot) {
+                    return !snapshot.hasData
+                        ? const Center(
+                            child: CircularProgressIndicator(),
+                          )
+                        : Material(
+                            borderRadius: BorderRadius.circular(10.r),
+                            color: Colors.blue.shade100,
+                            child: Column(
+                              children: [
+                                SizedBox(height: 10.h),
+                                Visibility(
+                                  visible: appointmentId != null,
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(horizontal: 8.w),
+                                      child: Text(
+                                        'Appointment Id: $appointmentId',
+                                        style: GoogleFonts.roboto(fontSize: 14),
+                                        textScaleFactor: 1.sp,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 10.h),
+                                CustomProfilePicture(
+                                    url: userDoc
+                                        .get(fieldAndKeyName.profilePicture)),
+                                SizedBox(height: 20.h),
+                                const CustomLableText(text: 'Personal info'),
+                                SizedBox(height: 20.h),
+                                profileField(
+                                  "Name: ",
+                                  userDoc
+                                      .get(fieldAndKeyName.name)
+                                      .toString()
+                                      .toUpperCase(),
+                                ),
+                                SizedBox(height: 20.h),
+                                profileField(
+                                  "Age: ",
+                                  AgeCalculator.age(DateTime.parse(userDoc
+                                          .get(fieldAndKeyName.dateOfBirth)))
+                                      .years
+                                      .toString(),
+                                ),
+                                SizedBox(height: 20.h),
+                                profileField(
+                                  "Gender: ",
+                                  userDoc.get(fieldAndKeyName.gender),
+                                ),
+                                SizedBox(height: 20.h),
+                                profileField(
+                                  "phone: ",
+                                  userDoc.get(fieldAndKeyName.phone),
+                                ),
+                                SizedBox(height: 20.h),
+                                profileField(
+                                  "Email: ",
+                                  userDoc
+                                      .get(fieldAndKeyName.email)
+                                      .toString()
+                                      .toUpperCase(),
+                                ),
+                                SizedBox(height: 20.h),
+                                profileField(
+                                  "Address: ",
+                                  userDoc.get(fieldAndKeyName.address),
+                                ),
+                                SizedBox(height: 10.h),
+                                const Divider(color: Colors.red),
+                                SizedBox(height: 10.h),
+                                const CustomLableText(text: 'Additional info'),
+                                SizedBox(height: 20.h),
+                                profileField(
+                                  "Last login: ",
+                                  userDoc.get(fieldAndKeyName.lastLogin),
+                                ),
+                                SizedBox(height: 20.h),
+                                profileField(
+                                  "User role: ",
+                                  userDoc
+                                      .get(fieldAndKeyName.userRole)
+                                      .toString()
+                                      .toUpperCase(),
+                                ),
+                                SizedBox(height: 20.h),
+                                profileField(
+                                  "Unique id: ",
+                                  userDoc.get(fieldAndKeyName.uid),
+                                ),
+                                SizedBox(height: 20.h),
+                                profileField(
+                                  "Total appointments: ",
+                                  snapshot.data!.docs.length.toString(),
+                                ),
+                              ],
+                            ),
+                          );
+                  }),
+              Positioned(
+                top: 10.w,
+                right: 10.w,
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: Icon(
+                    Icons.close,
+                    size: 30.sp,
+                    color: Colors.red,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
 
