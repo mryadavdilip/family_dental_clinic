@@ -60,6 +60,10 @@ class _AppointmentsCardState extends State<AppointmentsCard> {
                   ),
                 ),
                 SizedBox(height: 20.h),
+                profileField('Appointment id: ',
+                    widget.response!.appointmentId.toString(),
+                    size: 13),
+                SizedBox(height: 5.h),
                 profileField('Date: ',
                     DateFormat('dd-MM-yyyy').format(widget.response!.time),
                     size: 13),
@@ -84,12 +88,12 @@ class _AppointmentsCardState extends State<AppointmentsCard> {
               ],
             ),
           ),
-          Visibility(
-            visible: widget.isAdmin &&
-                widget.response!.status == AppointmentStatus.confirm.name,
-            child: Row(
-              children: [
-                IconButton(
+          Row(
+            children: [
+              Visibility(
+                visible: widget.isAdmin &&
+                    widget.response!.status == AppointmentStatus.confirm.name,
+                child: IconButton(
                   iconSize: 30.sp,
                   padding: EdgeInsets.zero,
                   onPressed: () {
@@ -101,7 +105,11 @@ class _AppointmentsCardState extends State<AppointmentsCard> {
                     size: 30.sp,
                   ),
                 ),
-                IconButton(
+              ),
+              Visibility(
+                visible: widget.isAdmin &&
+                    widget.response!.status == AppointmentStatus.visited.name,
+                child: IconButton(
                   iconSize: 30.sp,
                   padding: EdgeInsets.zero,
                   onPressed: () {
@@ -115,8 +123,8 @@ class _AppointmentsCardState extends State<AppointmentsCard> {
                     size: 30.sp,
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
           Visibility(
             visible: widget.isAdmin,
