@@ -95,6 +95,7 @@ class Messages {
   String get imageUpdateConfirmation =>
       'Are you sure, you want to update image?';
   String get serviceDetailsUpdated => 'Service details updated successfully';
+  String get reportSaved => 'Report saved to downloads folder';
 }
 
 final Messages messages = Messages();

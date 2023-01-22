@@ -58,6 +58,7 @@ dependencies:
   age_calculator: ^1.0.0
   syncfusion_flutter_pdfviewer: ^20.4.43
   file_picker: ^5.2.5
+  path_provider:
 
 dev_dependencies:
   flutter_test:

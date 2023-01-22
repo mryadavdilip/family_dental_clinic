@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:family_dental_clinic/Authentication/auth_controller.dart';
 import 'package:family_dental_clinic/CustomWidgets/CustomLableText.dart';
 import 'package:family_dental_clinic/Screens/PDFPage.dart';
+import 'package:family_dental_clinic/infra/Constants.dart';
 import 'package:family_dental_clinic/infra/Utils.dart';
 import 'package:family_dental_clinic/modules/ReportsResponse.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -8,7 +11,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 class Reports extends StatefulWidget {
@@ -97,17 +102,51 @@ class _ReportsState extends State<Reports> {
                                               subtitle: e.reportId.toString(),
                                             ),
                                             detailField(
-                                              onTap: () {
-                                                Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                        builder: (ctx) =>
-                                                            PDFPage(
-                                                              sfPdfViewer:
-                                                                  SfPdfViewer.memory(
-                                                                      snapshot
-                                                                          .data!),
-                                                            )));
+                                              onTap: () async {
+                                                getApplicationDocumentsDirectory();
+                                                File file = File(
+                                                    '/storage/emulated/0/Download/Family Dental Clinic - Report (${DateTime.now().millisecondsSinceEpoch}).pdf');
+                                                if (file.existsSync()) {
+                                                  await file.delete();
+                                                }
+                                                await file
+                                                    .writeAsBytes(
+                                                        snapshot.data!)
+                                                    .then((_) {
+                                                  Fluttertoast.showToast(
+                                                      msg:
+                                                          messages.reportSaved);
+                                                  Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                          builder: (ctx) =>
+                                                              PDFPage(
+                                                                sfPdfViewer:
+                                                                    SfPdfViewer
+                                                                        .memory(
+                                                                  snapshot
+                                                                      .data!,
+                                                                  canShowScrollStatus:
+                                                                      true,
+                                                                  canShowPasswordDialog:
+                                                                      true,
+                                                                  canShowPaginationDialog:
+                                                                      true,
+                                                                  canShowHyperlinkDialog:
+                                                                      true,
+                                                                  canShowScrollHead:
+                                                                      true,
+                                                                  enableTextSelection:
+                                                                      true,
+                                                                  enableDocumentLinkAnnotation:
+                                                                      true,
+                                                                  enableDoubleTapZooming:
+                                                                      true,
+                                                                  enableHyperlinkNavigation:
+                                                                      true,
+                                                                ),
+                                                              )));
+                                                });
                                               },
                                               title: 'Url: ',
                                               subtitle: e.url,
