@@ -367,10 +367,8 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
               context: context,
               barrierDismissible: false,
               builder: (context) {
-                return WillPopScope(
-                  onWillPop: () async {
-                    return false;
-                  },
+                return PopScope(
+                  canPop: false,
                   child: Scaffold(
                     backgroundColor: Colors.transparent,
                     body: Column(

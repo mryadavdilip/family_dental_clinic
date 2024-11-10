@@ -25,92 +25,95 @@ class _EditServicesState extends State<EditServices> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          XFile? image =
-              await ImagePicker().pickImage(source: ImageSource.gallery);
-          final TextEditingController headingController =
-              TextEditingController();
-          final TextEditingController descriptionController =
-              TextEditingController();
-          if (image != null) {
-            showModalBottomSheet(
-                context: context,
-                builder: (ctx) {
-                  return Column(
-                    children: [
-                      SizedBox(height: 10.h),
-                      FutureBuilder<Uint8List>(
-                        future: image.readAsBytes(),
-                        builder: (_, ss) {
-                          return ss.hasData
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(10000.r),
-                                  child: SizedBox(
-                                    height: 100.w,
-                                    width: 100.w,
-                                    child: Image.memory(
-                                      ss.data!,
-                                      fit: BoxFit.fill,
+        onPressed: () {
+          ImagePicker().pickImage(source: ImageSource.gallery).then((image) {
+            final TextEditingController headingController =
+                TextEditingController();
+            final TextEditingController descriptionController =
+                TextEditingController();
+
+            if (image != null) {
+              showModalBottomSheet(
+                  context: context,
+                  builder: (ctx) {
+                    return Column(
+                      children: [
+                        SizedBox(height: 10.h),
+                        FutureBuilder<Uint8List>(
+                          future: image.readAsBytes(),
+                          builder: (_, ss) {
+                            return ss.hasData
+                                ? ClipRRect(
+                                    borderRadius:
+                                        BorderRadius.circular(10000.r),
+                                    child: SizedBox(
+                                      height: 100.w,
+                                      width: 100.w,
+                                      child: Image.memory(
+                                        ss.data!,
+                                        fit: BoxFit.fill,
+                                      ),
                                     ),
-                                  ),
-                                )
-                              : const Center(
-                                  child: CircularProgressIndicator());
-                        },
-                      ),
-                      SizedBox(height: 10.h),
-                      CustomFormTextField(
-                        controller: headingController,
-                        lableText: 'Heading',
-                      ),
-                      CustomFormTextField(
-                        controller: descriptionController,
-                        lableText: 'Description',
-                        fieldType: CustomFormTextFieldType.address,
-                      ),
-                      SizedBox(height: 30.h),
-                      SizedBox(
-                        width: 300.w,
-                        child: CustomButton(
-                          onTap: () async {
-                            FirebaseStorage.instance
-                                .ref(pathNames.services)
-                                .child(
-                                    '${headingController.text}/${image.name}')
-                                .putData(await image.readAsBytes())
-                                .then((taskSnapshot) async {
-                              await taskSnapshot.ref
-                                  .getDownloadURL()
-                                  .then((url) {
-                                Utils(context)
-                                    .generateId(pathNames.services)
-                                    .then((serviceId) {
-                                  FirebaseFirestore.instance
-                                      .collection(pathNames.services)
-                                      .doc()
-                                      .set({
-                                    fieldAndKeyName.url: url,
-                                    fieldAndKeyName.serviceId: serviceId,
-                                    fieldAndKeyName.heading:
-                                        headingController.text,
-                                    fieldAndKeyName.description:
-                                        descriptionController.text,
-                                  }).then((_) {
-                                    Navigator.pop(context);
-                                    Fluttertoast.showToast(
-                                        msg: messages.serviceAddedSuccessfully);
+                                  )
+                                : const Center(
+                                    child: CircularProgressIndicator());
+                          },
+                        ),
+                        SizedBox(height: 10.h),
+                        CustomFormTextField(
+                          controller: headingController,
+                          lableText: 'Heading',
+                        ),
+                        CustomFormTextField(
+                          controller: descriptionController,
+                          lableText: 'Description',
+                          fieldType: CustomFormTextFieldType.address,
+                        ),
+                        SizedBox(height: 30.h),
+                        SizedBox(
+                          width: 300.w,
+                          child: CustomButton(
+                            onTap: () async {
+                              FirebaseStorage.instance
+                                  .ref(pathNames.services)
+                                  .child(
+                                      '${headingController.text}/${image.name}')
+                                  .putData(await image.readAsBytes())
+                                  .then((taskSnapshot) async {
+                                await taskSnapshot.ref
+                                    .getDownloadURL()
+                                    .then((url) {
+                                  Utils(context)
+                                      .generateId(pathNames.services)
+                                      .then((serviceId) {
+                                    FirebaseFirestore.instance
+                                        .collection(pathNames.services)
+                                        .doc()
+                                        .set({
+                                      fieldAndKeyName.url: url,
+                                      fieldAndKeyName.serviceId: serviceId,
+                                      fieldAndKeyName.heading:
+                                          headingController.text,
+                                      fieldAndKeyName.description:
+                                          descriptionController.text,
+                                    }).then((_) {
+                                      Navigator.pop(context);
+                                      Fluttertoast.showToast(
+                                          msg: messages
+                                              .serviceAddedSuccessfully);
+                                    });
                                   });
                                 });
                               });
-                            });
-                          },
-                          title: 'Add',
+                            },
+                            title: 'Add',
+                          ),
                         ),
-                      ),
-                    ],
-                  );
-                });
-          }
+                      ],
+                    );
+                  });
+            }
+          });
         },
         backgroundColor: Colors.blue,
         shape:
