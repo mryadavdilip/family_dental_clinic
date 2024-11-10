@@ -1,4 +1,4 @@
-package com.example.family_dental_clinic
+package com.example.fdc
 
 import io.flutter.embedding.android.FlutterActivity
 
