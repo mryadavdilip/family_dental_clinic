@@ -2,14 +2,14 @@ import 'dart:developer';
 
 import 'package:age_calculator/age_calculator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:family_dental_clinic/Authentication/auth_controller.dart';
-import 'package:family_dental_clinic/CustomWidgets/CustomFormButton.dart';
-import 'package:family_dental_clinic/CustomWidgets/CustomLableText.dart';
-import 'package:family_dental_clinic/CustomWidgets/CustomProfilePicture.dart';
+import 'package:family_dental_clinic/authentication/auth_controller.dart';
+import 'package:family_dental_clinic/modules/appointments_response.dart';
+import 'package:family_dental_clinic/modules/reports_response.dart';
+import 'package:family_dental_clinic/widgets/custom_form_button.dart';
+import 'package:family_dental_clinic/widgets/custom_lable_text.dart';
+import 'package:family_dental_clinic/widgets/custom_profile_picture.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
-import 'package:family_dental_clinic/modules/AppointmentsResponse.dart';
-import 'package:family_dental_clinic/modules/ReportsResponse.dart';
-import 'package:family_dental_clinic/provider/UserDataProvider.dart';
+import 'package:family_dental_clinic/provider/user_data_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -25,31 +25,35 @@ class Utils {
   Utils(this.context);
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   Future<UserData> syncUserData() async {
-    UserData userData = await _firestore
-        .collection(pathNames.users)
-        .doc(AuthController(context).currentUser?.email)
-        .get()
-        .then((doc) {
-      Provider.of<UserDataProvider>(context, listen: false)
-          .setUserData(UserData(
-        uid: doc.get(fieldAndKeyName.uid),
-        email: doc.get(fieldAndKeyName.email),
-        name: doc.get(fieldAndKeyName.name),
-        dateOfBirth: doc.get(fieldAndKeyName.dateOfBirth),
-        gender: doc.get(fieldAndKeyName.gender),
-        address: doc.get(fieldAndKeyName.address),
-        profilePicture: doc.get(fieldAndKeyName.profilePicture),
-        phone: doc.get(fieldAndKeyName.phone),
-        userRole: doc.get(fieldAndKeyName.userRole) == UserRole.admin.name
-            ? UserRole.admin
-            : UserRole.patient,
-      ));
-      return Provider.of<UserDataProvider>(context, listen: false).getUserData;
-    }).catchError((e) {
+    UserData? userData;
+    try {
+      userData = await _firestore
+          .collection(pathNames.users)
+          .doc(AuthController(context).currentUser?.email)
+          .get()
+          .then((doc) {
+        Provider.of<UserDataProvider>(context, listen: false)
+            .setUserData(UserData(
+          uid: doc.get(fieldAndKeyName.uid),
+          email: doc.get(fieldAndKeyName.email),
+          name: doc.get(fieldAndKeyName.name),
+          dateOfBirth: doc.get(fieldAndKeyName.dateOfBirth),
+          gender: doc.get(fieldAndKeyName.gender),
+          address: doc.get(fieldAndKeyName.address),
+          profilePicture: doc.get(fieldAndKeyName.profilePicture),
+          phone: doc.get(fieldAndKeyName.phone),
+          userRole: doc.get(fieldAndKeyName.userRole) == UserRole.admin.name
+              ? UserRole.admin
+              : UserRole.patient,
+        ));
+        return Provider.of<UserDataProvider>(context, listen: false)
+            .getUserData;
+      });
+    } catch (e) {
       log('getUserDataError: $e');
-    });
+    }
 
-    return userData;
+    return userData!;
   }
 
   viewAddressOnMap(String address) async {
@@ -81,9 +85,13 @@ class Utils {
 
   sendEmail(String email) async {
     Uri url = Uri.parse('mailto:$email');
-    launchUrl(url).catchError((e) {
-      Fluttertoast.showToast(msg: e.toString());
-    });
+    try {
+      launchUrl(url);
+    } catch (e) {
+      {
+        Fluttertoast.showToast(msg: e.toString());
+      }
+    }
   }
 
   confirmationDialog(
@@ -101,7 +109,7 @@ class Utils {
                 children: [
                   Text(
                     title,
-                    textScaleFactor: 1.sp,
+                    textScaler: TextScaler.linear(1.sp),
                     textAlign: TextAlign.center,
                   ),
                   Row(
@@ -225,7 +233,7 @@ class Utils {
             ],
           ),
           overflow: TextOverflow.fade,
-          textScaleFactor: 1.sp,
+          textScaler: TextScaler.linear(1.sp),
         ),
       );
     }
@@ -261,7 +269,7 @@ class Utils {
                                       child: Text(
                                         'Appointment Id: $appointmentId',
                                         style: GoogleFonts.roboto(fontSize: 14),
-                                        textScaleFactor: 1.sp,
+                                        textScaler: TextScaler.linear(1.sp),
                                       ),
                                     ),
                                   ),

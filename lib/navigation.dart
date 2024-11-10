@@ -1,10 +1,10 @@
-import 'package:family_dental_clinic/Authentication/auth_controller.dart';
+import 'package:family_dental_clinic/authentication/auth_controller.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
 import 'package:family_dental_clinic/infra/Utils.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:family_dental_clinic/Screens/Authentication/Login.dart';
-import 'package:family_dental_clinic/Screens/HomePage.dart';
+import 'package:family_dental_clinic/screens/authentication/login.dart';
+import 'package:family_dental_clinic/screens/home_page.dart';
 
 class Navigation extends StatefulWidget {
   const Navigation({Key? key}) : super(key: key);

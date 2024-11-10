@@ -1,29 +1,31 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:family_dental_clinic/widgets/custom_form_header.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
+import 'package:family_dental_clinic/infra/Utils.dart';
+import 'package:family_dental_clinic/provider/user_data_provider.dart';
+import 'package:family_dental_clinic/widgets/custom_form_button.dart';
+import 'package:family_dental_clinic/widgets/custom_form_header.dart';
+import 'package:family_dental_clinic/widgets/custom_form_text_field.dart';
+import 'package:family_dental_clinic/widgets/custom_profile_picture.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:family_dental_clinic/authentication/auth_controller.dart';
-import 'package:family_dental_clinic/widgets/custom_form_button.dart';
-import 'package:family_dental_clinic/widgets/custom_form_text_field.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
-class SignupPage extends StatefulWidget {
-  const SignupPage({Key? key}) : super(key: key);
+class ProfilePage extends StatefulWidget {
+  const ProfilePage({Key? key}) : super(key: key);
 
   @override
-  State<SignupPage> createState() => _SignupPageState();
+  State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _SignupPageState extends State<SignupPage> {
+class _ProfilePageState extends State<ProfilePage> {
+  UserData? userData;
+
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  final TextEditingController _emailEditingController = TextEditingController();
-  final TextEditingController _passwordEditingController =
-      TextEditingController();
-  final TextEditingController _confPasswordEditingController =
-      TextEditingController();
   final TextEditingController _firstNameEditingController =
       TextEditingController();
   final TextEditingController _lastNameEditingController =
@@ -36,15 +38,27 @@ class _SignupPageState extends State<SignupPage> {
       TextEditingController();
 
   Set<String> gendersList = {};
+  String selectedGender = '';
 
   @override
   void initState() {
+    userData =
+        Provider.of<UserDataProvider>(context, listen: false).getUserData;
     _loadDropdowns();
+
+    _firstNameEditingController.text = userData!.name.split(' ').first;
+    _lastNameEditingController.text = userData!.name.split(' ').last;
+    _phoneEditingController.text = userData!.phone;
+    _dobEditingController.text =
+        DateFormat('dd/MM/yyyy').format(DateTime.parse(userData!.dateOfBirth));
+    _genderEditingController.text = userData!.gender;
+    _addressEditingController.text = userData!.address;
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    userData = Provider.of<UserDataProvider>(context, listen: true).getUserData;
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -56,27 +70,24 @@ class _SignupPageState extends State<SignupPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 SizedBox(height: 20.h),
-                const CustomFormHeader(title: 'Sign Up'),
+                const CustomFormHeader(title: 'Edit Profile'),
                 SizedBox(height: 40.h),
-                CustomFormTextField(
-                  controller: _emailEditingController,
-                  fieldType: CustomFormTextFieldType.email,
-                  lableText: 'Email',
-                  hintText: 'Email',
-                ),
-                SizedBox(height: 30.h),
-                CustomFormTextField(
-                  controller: _passwordEditingController,
-                  fieldType: CustomFormTextFieldType.password,
-                  lableText: 'Password',
-                  hintText: 'Password',
-                ),
-                SizedBox(height: 30.h),
-                CustomFormTextField(
-                  controller: _confPasswordEditingController,
-                  fieldType: CustomFormTextFieldType.password,
-                  lableText: 'Confirm Password',
-                  hintText: 'Confirm Password',
+                GestureDetector(
+                  onTap: () {
+                    AuthController(context).setProfilePicture();
+                  },
+                  behavior: HitTestBehavior.translucent,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      CustomProfilePicture(url: userData!.profilePicture),
+                      Icon(
+                        Icons.photo_camera_outlined,
+                        size: 30.sp,
+                        color: Colors.black,
+                      ),
+                    ],
+                  ),
                 ),
                 SizedBox(height: 30.h),
                 Padding(
@@ -136,29 +147,30 @@ class _SignupPageState extends State<SignupPage> {
                 SizedBox(height: 40.h),
                 CustomFormButton(
                   onTap: () {
-                    AuthController(context).signupWithEmailAndPassword(
-                      email: _emailEditingController.text,
-                      password: _passwordEditingController.text,
-                      confirmPassword: _confPasswordEditingController.text,
-                      name:
-                          '${_firstNameEditingController.text} ${_lastNameEditingController.text}',
-                      phone: _phoneEditingController.text,
-                      dateOfBirth: DateFormat('dd/MM/yyyy')
-                          .parse(_dobEditingController.text)
-                          .toIso8601String(),
-                      gender: _genderEditingController.text,
-                      gendersList: gendersList,
-                      address: _addressEditingController.text,
-                    );
+                    Utils(context).confirmationDialog(
+                        title: messages.editProfileConfirmation,
+                        onConfirm: () async {
+                          AuthController(context).updateProfile(
+                            name:
+                                '${_firstNameEditingController.text} ${_lastNameEditingController.text}',
+                            phone: _phoneEditingController.text,
+                            dateOfBirth: DateFormat('dd/MM/yyyy')
+                                .parse(_dobEditingController.text)
+                                .toIso8601String(),
+                            gender: _genderEditingController.text,
+                            gendersList: gendersList,
+                            address: _addressEditingController.text,
+                          );
+                        });
                   },
-                  title: 'Sign up',
+                  title: 'Submit',
                 ),
                 SizedBox(height: 20.h),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Already have an account? ",
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 25.w),
+                  child: RichText(
+                    text: TextSpan(
+                      text: "To delete your account and data with FDC, ",
                       style: GoogleFonts.roboto(
                         fontSize: 16.sp,
                         color: Colors.blueGrey,
@@ -166,24 +178,25 @@ class _SignupPageState extends State<SignupPage> {
                         decoration: TextDecoration.underline,
                         decorationColor: Colors.blueGrey,
                       ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                      behavior: HitTestBehavior.translucent,
-                      child: Text(
-                        "Login here",
-                        style: GoogleFonts.roboto(
-                          fontSize: 16.sp,
-                          color: Colors.blue,
-                          fontWeight: FontWeight.w600,
-                          decoration: TextDecoration.underline,
-                          decorationColor: Colors.blueGrey,
+                      children: [
+                        TextSpan(
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              AuthController(context).deleteAccount();
+                            },
+                          text: "Click here",
+                          style: GoogleFonts.roboto(
+                            fontSize: 16.sp,
+                            color: Colors.blue,
+                            fontWeight: FontWeight.w600,
+                            decoration: TextDecoration.underline,
+                            decorationColor: Colors.blueGrey,
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
+                    textScaler: TextScaler.linear(1.sp),
+                  ),
                 ),
                 SizedBox(height: 20.h),
               ],
@@ -202,7 +215,7 @@ class _SignupPageState extends State<SignupPage> {
         .then((data) {
       data.data()?[fieldAndKeyName.gendersList].forEach((e) {
         gendersList.add(e[fieldAndKeyName.description].toString());
-        _genderEditingController.text = gendersList.first;
+        selectedGender = gendersList.first;
         setState(() {});
       });
     });

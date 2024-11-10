@@ -1,4 +1,4 @@
-import 'package:family_dental_clinic/Authentication/auth_controller.dart';
+import 'package:family_dental_clinic/authentication/auth_controller.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 

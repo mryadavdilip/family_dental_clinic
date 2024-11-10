@@ -1,12 +1,12 @@
-import 'package:family_dental_clinic/CustomWidgets/CustomFormHeader.dart';
+import 'package:family_dental_clinic/widgets/custom_form_button.dart';
+import 'package:family_dental_clinic/widgets/custom_form_header.dart';
+import 'package:family_dental_clinic/widgets/custom_form_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:family_dental_clinic/Authentication/auth_controller.dart';
-import 'package:family_dental_clinic/CustomWidgets/CustomFormButton.dart';
-import 'package:family_dental_clinic/CustomWidgets/CustomFormTextField.dart';
-import 'package:family_dental_clinic/Screens/Authentication/ResetPassword.dart';
-import 'package:family_dental_clinic/Screens/Authentication/Signup.dart';
+import 'package:family_dental_clinic/authentication/auth_controller.dart';
+import 'package:family_dental_clinic/Screens/authentication/reset_password.dart';
+import 'package:family_dental_clinic/Screens/authentication/signup.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);

@@ -1,10 +1,10 @@
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:family_dental_clinic/Screens/Authentication/SigninVerification.dart';
+import 'package:family_dental_clinic/Screens/Authentication/signin_verification.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
 import 'package:family_dental_clinic/infra/Utils.dart';
-import 'package:family_dental_clinic/provider/UserDataProvider.dart';
+import 'package:family_dental_clinic/provider/user_data_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';

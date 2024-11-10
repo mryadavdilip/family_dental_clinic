@@ -1,11 +1,11 @@
 import 'dart:io';
 
-import 'package:family_dental_clinic/Authentication/auth_controller.dart';
-import 'package:family_dental_clinic/CustomWidgets/CustomLableText.dart';
-import 'package:family_dental_clinic/Screens/PDFPage.dart';
+import 'package:family_dental_clinic/authentication/auth_controller.dart';
+import 'package:family_dental_clinic/screens/pdf_page.dart';
 import 'package:family_dental_clinic/infra/Constants.dart';
 import 'package:family_dental_clinic/infra/Utils.dart';
-import 'package:family_dental_clinic/modules/ReportsResponse.dart';
+import 'package:family_dental_clinic/modules/reports_response.dart';
+import 'package:family_dental_clinic/widgets/custom_lable_text.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -166,14 +166,8 @@ class _ReportsState extends State<Reports> {
   }
 
   loadReports() async {
-    reports = await FireStoreUtils()
-        .getReports(
-            widget.isAdmin ? null : AuthController(context).currentUser!.uid)
-        .catchError((e) {
-      if (kDebugMode) {
-        print(e);
-      }
-    });
+    reports = await FireStoreUtils().getReports(
+        widget.isAdmin ? null : AuthController(context).currentUser!.uid);
     setState(() {});
   }
 
@@ -203,7 +197,7 @@ class _ReportsState extends State<Reports> {
           )
         ],
       ),
-      textScaleFactor: 1.sp,
+      textScaler: TextScaler.linear(1.sp),
     );
   }
 }
