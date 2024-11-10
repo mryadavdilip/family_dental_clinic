@@ -1,29 +1,29 @@
 {
-  "project_info": {
-    "project_number": "332805861049",
-    "project_id": "family-dental-clinic-1",
-    "storage_bucket": "family-dental-clinic-1.firebasestorage.app"
-  },
-  "client": [
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:332805861049:android:1397808dad80b4acc7b568",
-        "android_client_info": {
-          "package_name": "com.example.family_dental_clinic"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyCfF1GCSnR_mySqnnIvpMl64HXXn3vNAvE"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
+    "project_info": {
+      "project_number": "332805861049",
+      "project_id": "family-dental-clinic-1",
+      "storage_bucket": "family-dental-clinic-1.firebasestorage.app"
+    },
+    "client": [
+      {
+        "client_info": {
+          "mobilesdk_app_id": "1:332805861049:android:1397808dad80b4acc7b568",
+          "android_client_info": {
+            "package_name": "com.example.family_dental_clinic"
+          }
+        },
+        "oauth_client": [],
+        "api_key": [
+          {
+            "current_key": "AIzaSyCfF1GCSnR_mySqnnIvpMl64HXXn3vNAvE"
+          }
+        ],
+        "services": {
+          "appinvite_service": {
+            "other_platform_oauth_client": []
+          }
         }
       }
-    }
-  ],
-  "configuration_version": "1"
-}
+    ],
+    "configuration_version": "1"
+  }
