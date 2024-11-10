@@ -53,10 +53,11 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCfF1GCSnR_mySqnnIvpMl64HXXn3vNAvE',
-    appId: '1:332805861049:android:1397808dad80b4acc7b568',
-    messagingSenderId: '332805861049',
-    projectId: 'family-dental-clinic-1',
-    storageBucket: 'family-dental-clinic-1.firebasestorage.app',
+    apiKey: 'AIzaSyB6rMRNfdnc3Ml-oLekRYHvlYBhMHq-WJg',
+    appId: '1:707340869914:android:aa6145e7ad77a087b5cca3',
+    messagingSenderId: '707340869914',
+    projectId: 'family-dental-clinic-2c2cb',
+    storageBucket: 'family-dental-clinic-2c2cb.appspot.com',
   );
+
 }

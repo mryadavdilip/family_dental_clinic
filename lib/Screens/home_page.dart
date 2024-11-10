@@ -42,7 +42,8 @@ class _HomePageState extends State<HomePage> {
 
   List<AppointmentsResponse> appointmentsResponseList = [];
 
-  final CarouselController _carouselController = CarouselController();
+  final CarouselSliderController _carouselController =
+      CarouselSliderController();
   int activeDentalServiceIndex = 0;
 
   @override

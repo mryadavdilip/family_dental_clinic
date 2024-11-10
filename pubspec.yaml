@@ -36,29 +36,30 @@ dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^2.0.1
+  
+  age_calculator: ^1.0.0
+  carousel_slider: ^5.0.0
+  clipboard: ^0.1.3
+  cloud_firestore: ^5.4.0
+  cupertino_icons: ^1.0.8
+  file_picker: ^8.0.5
+  firebase_auth: ^5.2.0
+  firebase_core: ^3.4.0
+  firebase_storage: ^12.2.0
+  flutter_screenutil: ^5.9.3
+  fluttertoast: ^8.2.8
+  geocoding: ^3.0.0
+  google_fonts: ^6.2.1
+  google_sign_in: ^6.2.2
+  image_picker: ^1.1.2
+  intl: ^0.19.0
+  path_provider: ^2.1.4
+  provider: ^6.1.2
+  scrollable_positioned_list: ^0.3.8
+  syncfusion_flutter_pdfviewer: ^27.1.58
+  url_launcher: ^6.3.1
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.2
-  flutter_screenutil: ^5.5.3+2
-  google_fonts: ^3.0.1
-  firebase_core: ^2.4.0
-  firebase_auth: ^4.2.1
-  cloud_firestore: ^4.2.0
-  google_sign_in: ^5.3.3
-  firebase_storage: ^11.0.8
-  intl:
-  url_launcher: ^6.1.7
-  geocoding: ^2.0.5
-  fluttertoast: ^8.1.2
-  clipboard: ^0.1.3
-  image_picker: ^0.8.6
-  provider: ^6.0.5
-  carousel_slider: ^4.2.1
-  scrollable_positioned_list: ^0.3.5
-  age_calculator: ^1.0.0
-  syncfusion_flutter_pdfviewer: ^20.4.43
-  file_picker: ^5.2.5
-  path_provider:
 
 dev_dependencies:
   flutter_test:

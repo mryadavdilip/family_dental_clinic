@@ -1,3 +1,4 @@
+import 'package:family_dental_clinic/firebase_options.dart';
 import 'package:family_dental_clinic/infra/Utils.dart';
 import 'package:family_dental_clinic/provider/user_data_provider.dart';
 import 'package:family_dental_clinic/provider/appointments_response_provider.dart';
@@ -9,7 +10,7 @@ import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(MultiProvider(
     providers: [
       ListenableProvider<UserDataProvider>(create: (_) => UserDataProvider()),
